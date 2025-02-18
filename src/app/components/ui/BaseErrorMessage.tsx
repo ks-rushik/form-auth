@@ -3,6 +3,7 @@ import { ErrorProps } from "next/error";
 
 type IErrorMessage = ErrorProps & {
   className?: string; 
+  statusCode?: number
 };
 
 export default function BaseErrorMessage(props: IErrorMessage) {

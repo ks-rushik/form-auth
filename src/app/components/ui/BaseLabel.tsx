@@ -1,19 +1,19 @@
 import { InputLabel, InputLabelProps } from "@mantine/core";
+import clsx from "clsx";
+import { FC } from "react";
 
-type ILableProp = InputLabelProps & {
+type IBaseLableProps = InputLabelProps & {
   labeltitle: string;
-  className: string
+  className?: string;
 };
 
-export default function BaseLabel(props: ILableProp) {
+ const BaseLabel:FC<IBaseLableProps> = (props) => {
   const { labeltitle, className, ...other } = props;
   return (
-    <InputLabel
-      className={` p-3 text-blue-500 ${className}`}
-      {...other}
-      required
-    >
+    <InputLabel className={clsx("p-3 text-red-500 underline", className)} {...other} required>
       {labeltitle}
     </InputLabel>
   );
 }
+
+export default BaseLabel

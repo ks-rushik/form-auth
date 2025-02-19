@@ -12,23 +12,31 @@ export default function Home() {
     <>
       <BaseLabel
         labeltitle="This is required field"
-        className="text-blue-700"
+        className="!text-blue-700"
       ></BaseLabel>
       <BaseTextArea
         label="This is Text area"
         placeholder="Input placeholder"
       ></BaseTextArea>
-      <BaseInput
-        placeholder="Enter the Value.."
-        className= "bg-blue-300 placeholder-red-900 "
-      />
+      <BaseInput placeholder="Enter the Value.." disabled={false} classNames={{input:"bg-blue-400"}}  />
       <BaseSelect
         label="Your favorite library"
         placeholder="Pick value"
-        data={["React", "Angular", "Vue", "Svelte"]}
+        data={[
+          { value: "react", label: "React" },
+          { value: "ng", label: "Angular" },
+          { value: "vue", label: "Vue", disabled: true },
+          { value: "svelte", label: "Svelte", disabled: true },
+        ]}
       />
       <BaseCheckBox label="I agree to sell my privacy" />
-      <BaseRadio label="I cannot be unchecked" />
+      <BaseRadio
+        label="I cannot be unchecked"
+        classNames={{
+          label: "text-yellow-400",
+          radio: " text-sm font-medium text-gray-900 dark:text-gray-300",
+        }}
+      />
       <BaseButton>Button</BaseButton>
       <BaseErrorMessage
         statusCode={404}

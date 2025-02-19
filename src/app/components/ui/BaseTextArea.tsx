@@ -1,18 +1,37 @@
-import { Textarea, TextareaProps } from "@mantine/core";
+import {
+  __InputStylesNames,
+  Textarea,
+  TextareaProps,
+  TextStylesNames,
+} from "@mantine/core";
+import clsx from "clsx";
+import { FC } from "react";
 
-type ITextAreaProp = TextareaProps & {
-  className?: string;
+type IBaseTextAreaProps = TextareaProps & {
+  classNames?: Partial<Record<__InputStylesNames, string>>;
 };
 
-export default function BaseTextArea(props: ITextAreaProp) {
-  const { className, ...other } = props;
+const BaseTextArea: FC<IBaseTextAreaProps> = (props) => {
+  const { classNames, disabled, ...other } = props;
+  const { input, ...otherElement } = classNames || {};
   return (
     <Textarea
       classNames={{
-        input:
-         `bg-green-50 border border-green-500 text-green-900 dark:text-green-400 placeholder-green-700 dark:placeholder-green-500 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5 dark:bg-gray-700 dark:border-green-500 mb-4 ${className}`,
+        ...classNames,
+        input: clsx(
+          "bg-blue-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5",
+          "dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500",
+          {
+            "mb-6  text-sm rounded-lg block w-full p-2.5 cursor-not-allowed":
+              disabled,
+          },
+          input
+        ),
+        ...otherElement,
       }}
       {...other}
     ></Textarea>
   );
-}
+};
+
+export default BaseTextArea;

@@ -1,17 +1,22 @@
-import { Text } from "@mantine/core";
+import { Text, TextProps } from "@mantine/core";
+import clsx from "clsx";
+import { error } from "console";
+import exp from "constants";
 import { ErrorProps } from "next/error";
+import { FC } from "react";
 
-type IErrorMessage = ErrorProps & {
-  className?: string; 
-  statusCode?: number
+type IErrorMessage = TextProps & {
+  error?:Error
 };
 
-export default function BaseErrorMessage(props: IErrorMessage) {
-  const { statusCode, title, className, ...other } = props;
+const BaseErrorMessage:FC<IErrorMessage> = (props: IErrorMessage)=>{
+  const {error, className, ...other } = props;
 
   return (
-    <Text className={className} {...other}>
-      {title || `An error occurred (Code: ${statusCode})`}
+    <Text className={clsx("text-red-500 underline", className)} {...other}>
+      {error?.message}
     </Text>
   );
 }
+
+export default BaseErrorMessage

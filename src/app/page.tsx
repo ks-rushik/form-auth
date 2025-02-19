@@ -17,6 +17,7 @@ export default function Home() {
       <BaseTextArea
         label="This is Text area"
         placeholder="Input placeholder"
+        classNames={{label:"text-red-600" }}
       ></BaseTextArea>
       <BaseInput placeholder="Enter the Value.." disabled={false} classNames={{input:"bg-blue-400"}}  />
       <BaseSelect
@@ -29,7 +30,7 @@ export default function Home() {
           { value: "svelte", label: "Svelte", disabled: true },
         ]}
       />
-      <BaseCheckBox label="I agree to sell my privacy" />
+      <BaseCheckBox label="I agree to sell my privacy" classNames={{label:"text-blue-700"}} />
       <BaseRadio
         label="I cannot be unchecked"
         classNames={{
@@ -37,11 +38,10 @@ export default function Home() {
           radio: " text-sm font-medium text-gray-900 dark:text-gray-300",
         }}
       />
-      <BaseButton>Button</BaseButton>
+      <BaseButton intent="primary" classNames={{root:"bg-blue-500 underline"}} >Button</BaseButton>
       <BaseErrorMessage
-        statusCode={404}
-        title="Page Not Found"
-        className="text-red-500"
+        error={new Error("Page not found")}
+        className="text-"
       />
     </>
   );

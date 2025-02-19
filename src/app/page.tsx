@@ -18,7 +18,10 @@ export default function Home() {
         label="This is Text area"
         placeholder="Input placeholder"
       ></BaseTextArea>
-      <BaseInput placeholder="Enter the Value.." />
+      <BaseInput
+        placeholder="Enter the Value.."
+        className= "bg-blue-300 placeholder-red-900 "
+      />
       <BaseSelect
         label="Your favorite library"
         placeholder="Pick value"

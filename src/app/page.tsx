@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <>
       <BaseLabel
-        labeltitle="This is required field"
+        labeltitle="This is required field" 
         className="!text-blue-700"
       />
       <BaseTextArea

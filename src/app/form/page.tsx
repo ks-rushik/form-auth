@@ -4,33 +4,20 @@ import BaseInput from "../components/ui/BaseInput";
 import BaseSelect from "../components/ui/BaseSelect";
 import BaseTextArea from "../components/ui/BaseTextArea";
 
-export default function FormFieldsPage() {
+const FormFieldsPage = () => {
   return (
     <FormGroup>
-      <FormField
-        label="Email"
-        name="email"
-        classNames={{input:"w-64"}}
-        component={BaseInput}
-        placeholder="Enter your email..."
-        error="email is required"
-      />
-      <FormField
-        label="Description"
-        name="description"
-        classNames={{input:"w-64"}}
-        component={BaseTextArea}
-        placeholder="Write something..."
-        error="description is required"
-      />
-      <FormField
-        label="Category"
-        name="category"
-        component={BaseSelect}
-        classNames={{input:"w-64"}}
-        data={["React", "Angular", "Vue", "Svelte"]}
-        error="category is required"
-      />
+      <FormField label="Email" name="email" error="email is required">
+        <BaseInput placeholder="Enter your email..." className="w-64" />
+      </FormField>
+      <FormField label="Description" name="description" error="Description is required">
+        <BaseTextArea placeholder="write something..." className="w-64" />
+      </FormField>
+      <FormField label="Category" name="select" error="Select one field">
+        <BaseSelect data={["React", "Angular", "Vue", "Svelte"]}  className="w-64" />
+      </FormField>
     </FormGroup>
   );
 }
+
+export default FormFieldsPage

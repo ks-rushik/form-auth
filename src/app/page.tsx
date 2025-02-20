@@ -13,7 +13,7 @@ export default function Home() {
       <BaseLabel
         labeltitle="This is required field"
         className="!text-blue-700"
-      ></BaseLabel>
+      />
       <BaseTextArea
         label="This is Text area"
         placeholder="Input placeholder"
@@ -41,7 +41,6 @@ export default function Home() {
       <BaseButton intent="primary" classNames={{root:"bg-blue-500 underline"}} >Button</BaseButton>
       <BaseErrorMessage
         error={new Error("Page not found")}
-        className="text-"
       />
     </>
   );

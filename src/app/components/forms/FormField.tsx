@@ -1,26 +1,24 @@
-import { ReactNode } from "react";
+import { ComponentType } from "react";
 import BaseErrorMessage from "../ui/BaseErrorMessage";
 import BaseLabel from "../ui/BaseLabel";
 
-type IFormFieldProps = {
+type IFormFieldProps<T> = {
   label: string;
   name: string;
-  component: ReactNode;
+  component: ComponentType<T>;
   error?: string;
-};
+} & T;
 
-export default function FormField(props: IFormFieldProps) {
+const FormField = <T,>(props: IFormFieldProps<T>) => {
   const { label, name, component: Component, error, ...componentProps } = props;
+
   return (
     <div className="mb-4">
       <BaseLabel htmlFor={name} labeltitle={label} />
-      <Component id={name} {...componentProps} />
-      {error && <BaseErrorMessage title={error} statusCode={0} />}
+      <Component id={name} {...(componentProps as T)} />
+      {error && <BaseErrorMessage error={new Error(error)} />}
     </div>
   );
-}
+};
 
-
-
-
-
+export default FormField;

@@ -37,7 +37,7 @@ const buttonVariants = cva(
   }
 );
 
-const BaseInput: FC<IBaseButtonProps> = (props) => {
+const BaseButton: FC<IBaseButtonProps> = (props) => {
   const { classNames, children, ...other } = props;
   const { root, ...otherElement } = classNames || {};
   return (
@@ -53,4 +53,4 @@ const BaseInput: FC<IBaseButtonProps> = (props) => {
   );
 };
 
-export default BaseInput;
+export default BaseButton;

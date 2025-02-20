@@ -7,12 +7,13 @@ import {
 import clsx from "clsx";
 import { FC } from "react";
 
-type IBaseInputProps = ElementProps<"input", keyof InputProps>  & InputProps & {
+type IBaseInputProps = ElementProps<"input", keyof InputProps> &
+  InputProps & {
     classNames?: Partial<Record<InputStylesNames, string>>;
   };
 
-const BaseInput:FC<IBaseInputProps> = (props) => {
-  const { classNames, disabled , ...other } = props;
+const BaseInput: FC<IBaseInputProps> = (props) => {
+  const { classNames, disabled, ...other } = props;
   const { input, ...otherElement } = classNames || {};
 
   return (

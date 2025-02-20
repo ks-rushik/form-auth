@@ -10,7 +10,7 @@ type IBaseLableProps = InputLabelProps & {
  const BaseLabel:FC<IBaseLableProps> = (props) => {
   const { labeltitle, className, ...other } = props;
   return (
-    <InputLabel className={clsx("p-3 text-red-500 underline", className)} {...other} required>
+    <InputLabel className={clsx("p-3 text-blue-500 underline", className)} {...other} required>
       {labeltitle}
     </InputLabel>
   );

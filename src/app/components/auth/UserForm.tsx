@@ -11,8 +11,11 @@ import { useState } from "react";
 
 const userformSchema = z.object({
   name: z.string().min(1, "Name is Required"),
-  phone:z.string().min(1,"Contact number is required").length(10,"Number is not valid"),
-  address:z.string().min(9, "Atleast 9 character long ")
+  phone: z
+    .string()
+    .min(1, "Contact number is required")
+    .length(10, "Number is not valid"),
+  address: z.string().min(9, "Atleast 9 character long "),
 });
 
 type UserFormData = z.infer<typeof userformSchema>;
@@ -27,10 +30,9 @@ const UserForm = () => {
     resolver: zodResolver(userformSchema),
   });
   console.log(errors);
-  
 
   const onSubmit = (data: UserFormData) => {
-    console.log("Profile Data:", data ,file);
+    console.log("Profile Data:", data, file);
   };
 
   return (
@@ -44,6 +46,7 @@ const UserForm = () => {
             label="Restarunt Name"
             name="name"
             error={errors.name?.message}
+            required={true}
           >
             <BaseInput
               {...register("name")}
@@ -52,22 +55,27 @@ const UserForm = () => {
               placeholder="Enter your restaurant name..."
             />
           </FormField>
-        
-          <FormField label="Contact Number" name="phone" error={errors.phone?.message}>
+
+          <FormField
+            label="Contact Number"
+            name="phone"
+            error={errors.phone?.message}
+            required={true}
+          >
             <BaseInput
               {...register("phone")}
               type="text"
               name="phone"
-              onChange={(e) => console.log(e.target.value)
-              }
+              required={true}
               placeholder="Enter your Phone number..."
             />
           </FormField>
-    
+
           <FormField
             label="Location"
             name="address"
             error={errors.address?.message}
+            required={true}
           >
             <BaseInput
               {...register("address")}

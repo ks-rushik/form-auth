@@ -6,13 +6,10 @@ import BaseButton from "../ui/BaseButton";
 import BaseInput from "../ui/BaseInput";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
-import { signUp } from "@/app/auth/signup/action";
+import { updatePassword } from "@/app/auth/(reset)/reset-password/action";
 
-const SignUpSchema = z
+const ResetPasswordSchema = z
   .object({
-    name: z.string().min(4, { message: "At least 4 characters long" }),
-    email: z.string().min(1, "Email is Required").email("Invalid email format"),
     password: z
       .string()
       .min(8, { message: "At least 8 characters long" })
@@ -30,44 +27,28 @@ const SignUpSchema = z
     path: ["confirmpassword"],
   });
 
-export type ISignUpFormData = z.infer<typeof SignUpSchema>;
+export type IResetPasswordData = z.infer<typeof ResetPasswordSchema>;
 
-const SignUpForm = () => {
+const ResetPassword = () => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<ISignUpFormData>({
-    resolver: zodResolver(SignUpSchema),
+  } = useForm<IResetPasswordData>({
+    resolver: zodResolver(ResetPasswordSchema),
   });
 
-  const onSubmit = (data: ISignUpFormData) => {
+  const onSubmit = (data: IResetPasswordData) => {
     console.log("SignUp Data:", data);
-    return signUp(data)
+    return updatePassword(data.password)
   };
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <FormGroup>
           <h1 className="flex flex-col items-center justify-center mb-10 text-xl">
-            SignUp Form
+            Reset Password
           </h1>
-          <FormField label="Name" name="name" error={errors.name?.message} required={true}>
-            <BaseInput
-              {...register("name")}
-              type="text"
-              placeholder="Enter your name..."
-              name="name"
-            />
-          </FormField>
-          <FormField label="Email" name="email" error={errors.email?.message} required={true}>
-            <BaseInput
-              {...register("email")}
-              type="email"
-              placeholder="Enter your email..."
-              name="email"
-            />
-          </FormField>
           <FormField
             label="Password"
             name="password"
@@ -81,6 +62,7 @@ const SignUpForm = () => {
               name="password"
             />
           </FormField>
+
           <FormField
             label="Confirm Password"
             name="confirmpassword"
@@ -93,6 +75,7 @@ const SignUpForm = () => {
               placeholder="Enter your password..."
             />
           </FormField>
+
           <BaseButton
            type="submit"
             intent="success"
@@ -102,16 +85,10 @@ const SignUpForm = () => {
           >
             Submit
           </BaseButton>
-          <div className="flex gap-2 justify-end mb-4 mt-4">
-            <span> Already have an account?</span>
-            <Link href="/auth/login" className="text-blue-600 hover:underline">
-              Login
-            </Link>
-          </div>
         </FormGroup>
       </form>
     </>
   );
 };
 
-export default SignUpForm;
+export default ResetPassword;

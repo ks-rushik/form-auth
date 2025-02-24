@@ -7,6 +7,7 @@ type IFormFieldProps = {
   name: string;
   error?: string;
   children?: ReactNode;
+  required?:boolean
 };
 
 const FormField: FC<IFormFieldProps> = (props) => {
@@ -15,11 +16,12 @@ const FormField: FC<IFormFieldProps> = (props) => {
     name,
     error,
     children,
+    required
   } = props;
 
   return (
     <div className="mb-6">
-      <BaseLabel htmlFor={name} labeltitle={label} />
+      <BaseLabel htmlFor={name} labeltitle={label} required={required}/>
       {children}
       {error && <BaseErrorMessage error={new Error(error)} />}
     </div>

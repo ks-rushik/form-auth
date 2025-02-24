@@ -6,30 +6,28 @@ import BaseButton from "../ui/BaseButton";
 import BaseInput from "../ui/BaseInput";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
-import { login } from "@/app/auth/login/action";
+import { resetPassword } from "@/app/auth/(reset)/reset-link/action";
 
-const loginSchema = z.object({
+const resetLinkSchema = z.object({
   email: z.string()
     .min(1, "Email is Required")
     .email("Invalid email format"),
-  password: z.string().min(1, "Password required"),
 });
 
-export type LoginFormData = z.infer<typeof loginSchema>;
+export type IResetLinkData = z.infer<typeof resetLinkSchema>;
 
 const LoginForm = () => {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<IResetLinkData>({
+    resolver: zodResolver(resetLinkSchema),
   });
 
-  const onSubmit = (data: LoginFormData) => {
+  const onSubmit = (data: IResetLinkData) => {
     console.log("Login Data:", data);
-    return login(data);
+    return resetPassword(data.email)
   };
 
   return (
@@ -37,7 +35,7 @@ const LoginForm = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="">
         <FormGroup>
           <h1 className="flex flex-col items-center justify-center mb-10 text-xl">
-            Login Form
+            Password Recovery
           </h1>
           <FormField label="Email" name="email" error={errors.email?.message} required={true}>
             <BaseInput
@@ -45,20 +43,7 @@ const LoginForm = () => {
               type="email"
               name="email"
               placeholder="Enter your email..."
-            />
-          </FormField>
-          <FormField
-            label="Password"
-            name="password"
-            error={errors.password?.message}
-            required={true}
-          >
-            <BaseInput
-              {...register("password")}
-              type="password"
-              name="password"
-              placeholder="Enter your Password"
-              classNames={{ input: "focus-within " }}
+             
             />
           </FormField>
           <BaseButton
@@ -69,17 +54,9 @@ const LoginForm = () => {
             }}
             loading={isSubmitting} 
           >
-          Login
+          Enter Email
           </BaseButton>
-          <div className="flex justify-between text-md mb-4">
-            <Link href="/auth/reset-link">Forget password?</Link>
-            <div className="flex gap-1 justify-end">
-              <span>Don't have account?</span>
-              <Link href="/auth/signup" className="text-blue-600 hover:underline">
-                SignUp
-              </Link>
-            </div>
-          </div>
+        
         </FormGroup>
       </form>
     </>

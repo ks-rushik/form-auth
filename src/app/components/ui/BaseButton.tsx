@@ -8,6 +8,7 @@ type IBaseButtonProps = ButtonProps &
     classNames?: {
       root: Partial<Record<ButtonStylesNames, string>>;
     };
+    type?: "button" | "submit" | "reset";
   };
 
 const buttonVariants = cva(

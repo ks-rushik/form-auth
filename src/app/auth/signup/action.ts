@@ -10,15 +10,17 @@ export async function signUp(formData: ISignUpFormData) {
   const supabase = await createClient()
 
  
-  const data = {
+  const Objdata = {
     email: formData.email,
     password: formData.password,
     name: formData.name,
     confirmpassword: formData.confirmpassword,
   }
 
-  const { error } = await supabase.auth.signUp(data)
+  const { data , error } = await supabase.auth.signUp(Objdata)
 
+  console.log(data , error);
+  
   if (error) {
     redirect('/error')
   }

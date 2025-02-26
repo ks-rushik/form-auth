@@ -1,3 +1,4 @@
+'use client'
 import BaseLabel from "./components/ui/BaseLabel";
 import BaseTextArea from "./components/ui/BaseTextArea";
 import BaseInput from "./components/ui/BaseInput";
@@ -38,7 +39,8 @@ export default function Home() {
           radio: " text-sm font-medium text-gray-900 dark:text-gray-300",
         }}
       />
-      <BaseButton intent="primary" classNames={{root:"bg-blue-500 underline"}} >Button</BaseButton>
+      <BaseButton intent="primary" onClick={()=>console.log("hello")
+      } classNames={{root:"bg-blue-500 underline"}} >Button</BaseButton>
       <BaseErrorMessage
         error={new Error("Page not found")}
       />

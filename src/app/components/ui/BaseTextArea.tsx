@@ -2,7 +2,6 @@ import {
   __InputStylesNames,
   Textarea,
   TextareaProps,
-  TextStylesNames,
 } from "@mantine/core";
 import clsx from "clsx";
 import { FC } from "react";

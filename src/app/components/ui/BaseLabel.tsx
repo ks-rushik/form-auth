@@ -7,13 +7,13 @@ type IBaseLableProps = InputLabelProps & {
   className?: string;
 };
 
- const BaseLabel:FC<IBaseLableProps> = (props) => {
+const BaseLabel: FC<IBaseLableProps> = (props) => {
   const { labeltitle, className, ...other } = props;
   return (
     <InputLabel className={clsx(" text-blue-500 ", className)} {...other}>
       {labeltitle}
     </InputLabel>
   );
-}
+};
 
-export default BaseLabel
+export default BaseLabel;

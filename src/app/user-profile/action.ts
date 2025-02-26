@@ -1,9 +1,8 @@
 "use server";
-import { createClient } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-
 export async function submitUserForm(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -17,7 +16,7 @@ export async function submitUserForm(formData: FormData) {
   let logoUrl: string | null = null;
 
   if (logoFile && logoFile.size > 0) {
-    const fileName = `${Date.now()}_${logoFile.name}`;
+    const fileName = `${logoFile.name}`;
 
     const { error } = await supabase.storage
       .from("logo")
@@ -28,16 +27,16 @@ export async function submitUserForm(formData: FormData) {
     const { data } = supabase.storage.from("logo").getPublicUrl(fileName);
     logoUrl = data.publicUrl;
   }
-  const { data: existingData } = await supabase
+  const { data } = await supabase
     .from("user_profile")
-    .select("name, phone, address, logo")
+    .select()
     .eq("id", userId)
     .single();
 
-  if (existingData) {
+  if (data) {
     const { error: updateError } = await supabase
       .from("user_profile")
-      .update({ name, phone, address, logo: logoUrl || existingData.logo })
+      .update({ name, phone, address, logo: logoUrl || data.logo })
       .eq("id", userId);
 
     if (updateError) {
@@ -46,7 +45,8 @@ export async function submitUserForm(formData: FormData) {
   } else {
     const { error: insertError } = await supabase
       .from("user_profile")
-      .insert([{ name, phone, address, logo: logoUrl }]);
+      .insert([{ name, phone, address, logo: logoUrl }])
+      .eq("id", userId);
 
     if (insertError) {
       redirect("/error");
@@ -54,20 +54,17 @@ export async function submitUserForm(formData: FormData) {
   }
   redirect("/");
 }
-
 export async function getUserProfile() {
-    const supabase =  createClient();
-  
-    const {
-      data: { user }
-    } = await supabase.auth.getUser();
-    const userId = user?.id;
-    console.log(user);
-    
-    const { data } = await supabase
-      .from("user_profile")
-      .select()
-      .eq("id", userId)
-      .single();
-    return data || { name: "", phone: "", address: "", logo: null };
-  }
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const userId = user?.id;
+  const { data } = await supabase
+    .from("user_profile")
+    .select()
+    .eq("id", userId)
+    .single();
+  return data || { name: "", phone: "", address: "", logo: null };
+}

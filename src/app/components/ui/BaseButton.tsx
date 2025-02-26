@@ -1,13 +1,13 @@
 import { Button, ButtonProps, ButtonStylesNames } from "@mantine/core";
 import { cva, VariantProps } from "class-variance-authority";
 import clsx from "clsx";
-import { FC } from "react";
+import { ButtonHTMLAttributes, FC } from "react";
 
 type IBaseButtonProps = ButtonProps &
+  ButtonHTMLAttributes<HTMLButtonElement> &
   VariantProps<typeof buttonVariants> & {
-    classNames?: {
-      root: Partial<Record<ButtonStylesNames, string>>;
-    };
+    classNames?: 
+      Partial<Record<ButtonStylesNames, string>>;
     type?: "button" | "submit" | "reset";
   };
 
@@ -39,14 +39,15 @@ const buttonVariants = cva(
 );
 
 const BaseButton: FC<IBaseButtonProps> = (props) => {
-  const { classNames, children, ...other } = props;
+  const { classNames, children,intent,disabled, ...other } = props;
   const { root, ...otherElement } = classNames || {};
   return (
     <Button
       classNames={{
-        root: clsx(buttonVariants, root),
+        root: clsx(buttonVariants({intent,disabled}), root),
         ...otherElement,
       }}
+      disabled={disabled}
       {...other}
     >
       {children}

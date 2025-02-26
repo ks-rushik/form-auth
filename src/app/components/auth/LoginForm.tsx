@@ -7,7 +7,7 @@ import BaseInput from "../ui/BaseInput";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { login } from "@/app/auth/login/action";
+import { login } from "@/app/auth/(authentication)/login/action";
 
 const loginSchema = z.object({
   email: z.string()
@@ -63,7 +63,7 @@ const LoginForm = () => {
           </FormField>
           <BaseButton
             type="submit"
-            intent="success"
+            intent="primary"
             classNames={{
               root: "mb-2 w-full py-2 rounded-md",
             }}

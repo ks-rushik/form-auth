@@ -1,15 +1,16 @@
 "use client";
 
 import { z } from "zod";
-import FormField from "../forms/FormField";
-import FormGroup from "../forms/FormGroup";
-import BaseButton from "../ui/BaseButton";
-import BaseInput from "../ui/BaseInput";
+import FormField from "./forms/FormField";
+import FormGroup from "./forms/FormGroup";
+import BaseButton from "./ui/BaseButton";
+import BaseInput from "./ui/BaseInput";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FileButton } from "@mantine/core";
-import { useState } from "react";
-import { submitUserForm } from "@/app/auth/user-profile/action";
+import { FileButton, Space, Textarea } from "@mantine/core";
+import { FC, useState } from "react";
+import { submitUserForm } from "@/app/user-profile/action";
+import Image from "next/image";
 
 export const userformSchema = z.object({
   name: z.string().min(1, "Name is Required"),
@@ -29,10 +30,17 @@ type IUserFormProps = {
     address: string;
     logo: string | null;
   };
-}
+};
 
-const UserForm = ({ defaultData }: IUserFormProps) => {
+const UserForm: FC<IUserFormProps> = ({ defaultData }) => {
   const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(defaultData.logo);
+
+  const handleFileChange = (newFile: File | null) => {
+    setFile(newFile);
+    setPreview(URL.createObjectURL(newFile!));
+  };
+
   const {
     register,
     handleSubmit,
@@ -46,9 +54,8 @@ const UserForm = ({ defaultData }: IUserFormProps) => {
     formData.append("name", data.name);
     formData.append("phone", data.phone);
     formData.append("address", data.address);
-    if (file) {
-      formData.append("logo", file);
-    }
+    formData.append("logo", file!);
+
     return submitUserForm(formData);
   };
 
@@ -62,7 +69,7 @@ const UserForm = ({ defaultData }: IUserFormProps) => {
           label="Restaurant Name"
           name="name"
           error={errors.name?.message}
-          required={true}
+          required
         >
           <BaseInput
             {...register("name")}
@@ -77,7 +84,7 @@ const UserForm = ({ defaultData }: IUserFormProps) => {
           label="Contact Number"
           name="phone"
           error={errors.phone?.message}
-          required={true}
+          required
         >
           <BaseInput
             {...register("phone")}
@@ -85,7 +92,6 @@ const UserForm = ({ defaultData }: IUserFormProps) => {
             name="phone"
             placeholder="Enter your Phone number..."
             defaultValue={defaultData.phone}
-
           />
         </FormField>
 
@@ -93,32 +99,38 @@ const UserForm = ({ defaultData }: IUserFormProps) => {
           label="Location"
           name="address"
           error={errors.address?.message}
-          required={true}
+          required
         >
-          <BaseInput
+          <Textarea
             {...register("address")}
-            type="text"
             name="address"
             placeholder="Enter your Location..."
             defaultValue={defaultData.address}
-
+            classNames={{ input: "bg-blue-50" }}
           />
         </FormField>
 
-        <div className="mb-6">
-          <FileButton onChange={setFile} accept="image/png,image/jpeg">
-            {(props) => <BaseButton {...props}>Upload Logo</BaseButton>}
-          </FileButton>
-          {file ? (
-            <p>Selected: {file.name}</p>
-          ) : (
-            defaultData.logo && <p>Current Logo: {defaultData.logo}</p>
+        <div className="mb-4">
+          {preview && (
+            <Image
+              src={preview ? preview : defaultData.logo!}
+              alt="Uploaded Logo"
+              width={200}
+              height={100}
+              className="mt-2   object-cover rounded border-black border-2"
+            />
           )}
+          <Space h="md" />
+          <FileButton onChange={handleFileChange} accept="image/png,image/jpeg">
+            {(props) => (
+              <BaseButton intent={"default"} type="submit" {...props}>
+                Upload Logo
+              </BaseButton>
+            )}
+          </FileButton>
         </div>
 
         <BaseButton
-          type="submit"
-          intent="success"
           classNames={{
             root: "mb-2 w-full py-2 rounded-md",
           }}

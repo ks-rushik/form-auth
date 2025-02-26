@@ -7,7 +7,7 @@ import BaseInput from "../ui/BaseInput";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { signUp } from "@/app/auth/signup/action";
+import { signUp } from "@/app/auth/(authentication)/signup/action";
 
 const SignUpSchema = z
   .object({

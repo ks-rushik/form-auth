@@ -5,7 +5,7 @@ import Link from "next/link";
 import BaseButton from "../ui/BaseButton";
 import LogOut from "../auth/LogOut";
 
-export default function Navbar() {
+ const Navbar =() => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
@@ -32,3 +32,5 @@ export default function Navbar() {
     </nav>
   );
 }
+
+export default Navbar

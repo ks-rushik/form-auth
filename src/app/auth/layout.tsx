@@ -3,8 +3,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@mantine/core/styles.css";
 import { MantineProvider } from "@mantine/core";
-import "./globals.css";
-import Navbar from "./components/navbar/NavBar";
+import "./../globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,14 +24,12 @@ export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
-  return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <MantineProvider><Navbar/>{children} </MantineProvider>
-      </body>
-    </html>
-  );
-}
+}>){ return(
+   <html lang="en">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          <MantineProvider>{children}</MantineProvider>
+        </body>
+      </html>
+)}

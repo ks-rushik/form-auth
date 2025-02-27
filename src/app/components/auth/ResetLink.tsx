@@ -6,7 +6,7 @@ import BaseButton from "../ui/BaseButton";
 import BaseInput from "../ui/BaseInput";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { resetPassword } from "@/app/auth/(reset)/reset-link/action";
+import { resetPassword } from "@/app/auth/(authentication)/(reset)/reset-link/action";
 
 const resetLinkSchema = z.object({
   email: z.string()

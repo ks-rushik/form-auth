@@ -6,7 +6,7 @@ import BaseButton from "../ui/BaseButton";
 import BaseInput from "../ui/BaseInput";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { updatePassword } from "@/app/auth/(reset)/reset-password/action";
+import { updatePassword } from "@/app/auth/(authentication)/(reset)/reset-password/action";
 
 const ResetPasswordSchema = z
   .object({

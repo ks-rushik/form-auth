@@ -43,7 +43,7 @@ const SignUpForm = () => {
 
   const onSubmit = (data: ISignUpFormData) => {
     console.log("SignUp Data:", data);
-    return signUp(data)
+    return signUp(data);
   };
   return (
     <>
@@ -52,7 +52,12 @@ const SignUpForm = () => {
           <h1 className="flex flex-col items-center justify-center mb-10 text-xl">
             SignUp Form
           </h1>
-          <FormField label="Name" name="name" error={errors.name?.message} required={true}>
+          <FormField
+            label="Name"
+            name="name"
+            error={errors.name?.message}
+            required={true}
+          >
             <BaseInput
               {...register("name")}
               type="text"
@@ -60,7 +65,12 @@ const SignUpForm = () => {
               name="name"
             />
           </FormField>
-          <FormField label="Email" name="email" error={errors.email?.message} required={true}>
+          <FormField
+            label="Email"
+            name="email"
+            error={errors.email?.message}
+            required={true}
+          >
             <BaseInput
               {...register("email")}
               type="email"
@@ -94,8 +104,7 @@ const SignUpForm = () => {
             />
           </FormField>
           <BaseButton
-           type="submit"
-            intent="success"
+            type="submit"
             classNames={{
               root: "mb-2 w-full py-2 rounded-md",
             }}

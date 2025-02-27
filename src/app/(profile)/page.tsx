@@ -1,12 +1,14 @@
 'use client'
-import BaseLabel from "./components/ui/BaseLabel";
-import BaseTextArea from "./components/ui/BaseTextArea";
-import BaseInput from "./components/ui/BaseInput";
-import BaseSelect from "./components/ui/BaseSelect";
-import BaseCheckBox from "./components/ui/BaseCheckBox";
-import BaseRadio from "./components/ui/BaseRadio";
-import BaseButton from "./components/ui/BaseButton";
-import BaseErrorMessage from "./components/ui/BaseErrorMessage";
+
+import BaseButton from "../components/ui/BaseButton";
+import BaseCheckBox from "../components/ui/BaseCheckBox";
+import BaseErrorMessage from "../components/ui/BaseErrorMessage";
+import BaseInput from "../components/ui/BaseInput";
+import BaseLabel from "../components/ui/BaseLabel";
+import BaseRadio from "../components/ui/BaseRadio";
+import BaseSelect from "../components/ui/BaseSelect";
+import BaseTextArea from "../components/ui/BaseTextArea";
+
 
 export default function Home() {
   return (

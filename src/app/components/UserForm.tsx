@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FileButton, Space, Textarea } from "@mantine/core";
 import { FC, useState } from "react";
-import { submitUserForm } from "@/app/user-profile/action";
+import { submitUserForm } from "@/app/(profile)/user-profile/action";
 import Image from "next/image";
 
 export const userformSchema = z.object({
@@ -38,7 +38,9 @@ const UserForm: FC<IUserFormProps> = ({ defaultData }) => {
 
   const handleFileChange = (newFile: File | null) => {
     setFile(newFile);
-    setPreview(URL.createObjectURL(newFile!));
+    if(newFile){
+      setPreview(URL.createObjectURL(newFile));
+    }
   };
 
   const {
@@ -123,7 +125,7 @@ const UserForm: FC<IUserFormProps> = ({ defaultData }) => {
           <Space h="md" />
           <FileButton onChange={handleFileChange} accept="image/png,image/jpeg">
             {(props) => (
-              <BaseButton intent={"default"} type="submit" {...props}>
+              <BaseButton intent={"default"}  {...props}>
                 Upload Logo
               </BaseButton>
             )}
@@ -131,6 +133,7 @@ const UserForm: FC<IUserFormProps> = ({ defaultData }) => {
         </div>
 
         <BaseButton
+         type="submit"
           classNames={{
             root: "mb-2 w-full py-2 rounded-md",
           }}

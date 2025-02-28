@@ -1,4 +1,4 @@
-import UserForm from "@/app/components/UserForm";
+import UserForm from "@/app/components/dashboard/profile/UserForm";
 import { getUserProfile } from "./action";
 
 

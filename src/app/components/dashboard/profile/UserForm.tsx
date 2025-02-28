@@ -1,15 +1,15 @@
 "use client";
 
 import { z } from "zod";
-import FormField from "./forms/FormField";
-import FormGroup from "./forms/FormGroup";
-import BaseButton from "./ui/BaseButton";
-import BaseInput from "./ui/BaseInput";
+import FormField from "../../forms/FormField";
+import FormGroup from "../../forms/FormGroup";
+import BaseButton from "../../ui/BaseButton";
+import BaseInput from "../../ui/BaseInput";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FileButton, Space, Textarea } from "@mantine/core";
 import { FC, useState } from "react";
-import { submitUserForm } from "@/app/(profile)/user-profile/action";
+import { submitUserForm } from "@/app/(dashboard)/user-profile/action";
 import Image from "next/image";
 
 export const userformSchema = z.object({

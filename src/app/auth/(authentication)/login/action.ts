@@ -22,5 +22,5 @@ export async function login(formData: LoginFormData) {
   }
 
   revalidatePath('/', 'layout')
-  redirect('/')
+  redirect('/menu')
 }

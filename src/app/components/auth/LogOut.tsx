@@ -9,7 +9,6 @@ const LogOut = () => {
     <>
       <Modal opened={opened} onClose={close} title="Confirm action" size={"md"}>
         <div className="flex flex-col">
-          {" "}
           Are you sure you want to logout?
           <BaseButton
             type="submit"

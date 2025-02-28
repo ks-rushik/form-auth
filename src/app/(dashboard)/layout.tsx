@@ -4,7 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "@mantine/core/styles.css";
 import { MantineProvider } from "@mantine/core";
 import "./../globals.css";
-import Navbar from "./../components/navbar/NavBar";
+import Navbar from "../components/navbar/NavBar";
 import QueryProvider from "../components/QueryProvider";
 
 const geistSans = Geist({

@@ -13,7 +13,7 @@ const BaseErrorMessage:FC<IErrorMessage> = (props: IErrorMessage)=>{
   const {error, className, ...other } = props;
 
   return (
-    <Text className={clsx("text-red-500 underline", className)} {...other}>
+    <Text className={clsx("text-red-500 ", className)} {...other}>
       {error?.message}
     </Text>
   );

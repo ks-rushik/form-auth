@@ -4,7 +4,7 @@ import BaseLabel from "../ui/BaseLabel";
 
 type IFormFieldProps = {
   label: string;
-  name: string;
+  name?: string;
   error?: string;
   children?: ReactNode;
   required?:boolean

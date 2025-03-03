@@ -1,54 +1,39 @@
-"use client";
+'use client'
+import { useEffect, useState } from "react";
 import { Table } from "@mantine/core";
 import MenuModal from "./MenuModal";
-import { FC, useState } from "react";
-import {  IMenuDefaulData } from "./Types";
 import BaseButton from "../../ui/BaseButton";
-import deleteaction from "@/app/(dashboard)/menu/deleteaction";
+import { IModalData } from "./Types";
 import { menu } from "@/app/(dashboard)/menu/insertaction";
 import { Database } from "../../../../../database.types";
+import deleteaction from "@/app/(dashboard)/menu/deleteaction";
+import useUserMenu from "./useUserMenu";
 
-type IMenu = Database['public']['Tables']['menus']['Row'][]
+export type IMenudata = Database["public"]["Tables"]["menus"]["Row"];
 
-type IMenuProps = {
-  defaultData?:  IMenu| null;
-};
+const Menu = () => {
+  const [menuItems, setMenuItems] = useState<IMenudata[]>([]);
+  const data = useUserMenu(); 
 
-const Menu: FC<IMenuProps> = ({ defaultData }) => {
-  const [menuItems, setMenuItems] = useState<IMenu[]>(defaultData);
-  console.log(defaultData);
+  useEffect(() => {
+    if (data) {
+      setMenuItems(data); 
+    }
+  }, [data]);
 
-  const handleAddMenu = async(newItem: IMenuDefaulData) => {
-   const data  = await menu(newItem) 
-   if(!data) return;
-    const newMenuItem = {
-      id:data.id,
-      menu_name: data.menu_name,
-      currency: newItem.currency,
-      status: newItem.status,
-    };
-    setMenuItems((prevItems) => [...prevItems, newMenuItem]);
+  const handleAddMenu = async (newItem: IModalData) => {
+    const addedItem = await menu(newItem);
+    if (addedItem) setMenuItems((prev) => [...prev, addedItem]);
   };
 
-  const handleDelete = (id: number) => {
-    console.log(id);
-    
-    const prevItems = menuItems
-    setMenuItems((prevItems) => prevItems.filter((item) => item.id !== id));
-    deleteaction(id)
-
+  const handleDeleteMenu = async (
+    id: string,
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    e.stopPropagation();
+    await deleteaction(id);
+    setMenuItems((prev) => prev.filter((item) => item.id !== id));
   };
-
-  const combinedMenuItems = [
-    ...defaultData.map((item) => ({
-      id: item.id,
-      menu: item.menu_name,
-      currency: item.currency,
-      availability: item.status,
-    })),
-    ...menuItems,
-  ];
-  console.log(combinedMenuItems);
 
   return (
     <>
@@ -56,33 +41,42 @@ const Menu: FC<IMenuProps> = ({ defaultData }) => {
         <h1 className="text-4xl">Menus</h1>
         <MenuModal onAddMenu={handleAddMenu} />
       </div>
-      <Table>
-        <Table.Thead>
-          <Table.Tr classNames={{ tr: "text-2xl" }}>
-            <Table.Th>Menu</Table.Th>
-            <Table.Th>Currency</Table.Th>
-            <Table.Th>Availability</Table.Th>
-            <Table.Th></Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
-          {combinedMenuItems.map((item) => (
-            <Table.Tr key={item.id} classNames={{ tr: "text-xl" }}>
-              <Table.Td>{item.menu}</Table.Td>
-              <Table.Td>{item.currency}</Table.Td>
-              <Table.Td>{item.availability}</Table.Td>
-              <Table.Td>
-                <BaseButton
-                  intent={"danger"}
-                  onClick={() => handleDelete(item.id!)}
-                >
-                  Delete
-                </BaseButton>
-              </Table.Td>
+
+      {menuItems.length === 0 ? (
+        <p className="text-center text-gray-500 mt-4">
+          No menus available. Click "Add New Menu" to create one.
+        </p>
+      ) : (
+        <Table striped highlightOnHover>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Name</Table.Th>
+              <Table.Th>Visibility</Table.Th>
+              <Table.Th>Edit</Table.Th>
+              <Table.Th>Delete</Table.Th>
             </Table.Tr>
-          ))}
-        </Table.Tbody>
-      </Table>
+          </Table.Thead>
+          <Table.Tbody>
+            {menuItems.map((item) => (
+              <Table.Tr key={item.id}>
+                <Table.Td>{item.menu_name} ({item.currency})</Table.Td>
+                <Table.Td>{item.status}</Table.Td>
+                <Table.Td>
+                  <BaseButton intent="purple">Edit</BaseButton>
+                </Table.Td>
+                <Table.Td>
+                  <BaseButton
+                    intent="default"
+                    onClick={(e) => handleDeleteMenu(item.id, e)}
+                  >
+                    Delete
+                  </BaseButton>
+                </Table.Td>
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        </Table>
+      )}
     </>
   );
 };

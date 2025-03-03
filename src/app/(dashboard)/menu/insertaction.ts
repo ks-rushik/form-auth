@@ -1,8 +1,9 @@
 "use server";
-import { IMenu, IMenuDefaulData } from "@/app/components/dashboard/menu/Types";
+import { IMenudata } from "@/app/components/dashboard/menu/Menu";
+import {  IModalData } from "@/app/components/dashboard/menu/Types";
 import { createClient } from "@/utils/supabase/server";
 
-export async function menu(formData: IMenu) {
+export async function menu(formData:IModalData) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -12,51 +13,48 @@ export async function menu(formData: IMenu) {
 
   const menudata = {
     restaurant_id: userId,
-    menu_name: formData.menu,
+    menu_name: formData.menu_name,
     currency: formData.currency,
-    status: formData.availability,
+    status: formData.status,
   };
 
-  const { data, error } = await supabase
-    .from("menus")
-    .select()
-    .eq("restaurant_id", userId)
-    .single();
-  console.log(data, error);
+  if(!userId) return
+
+  
+  // console.log(data, error);
 
   const { error: insertError ,data:InsertData} = await supabase
     .from("menus")
-    .insert(menudata)
-    .eq("restaurant_id", userId);
+    .upsert(menudata)
+    .select()
 
   if (insertError) {
     console.log(insertError);
   }
-  console.log(InsertData);
+  // console.log(InsertData);
   
-//  return InsertData
+  return InsertData?.[0];
+  
 }
-export async function getMenuData(): Promise<IMenuDefaulData[]> {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    const userId = user?.id;
-    console.log(userId);
-    
-    const { data } = await supabase
-      .from("menus")
-      .select()
-      .eq("restaurant_id", userId);
-      console.log(data);
-      
+
+ const fetchMenudata = async() => {
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const userId = user?.id;
+  console.log(userId);
   
-    return data ?? [
-      {
-        menu: "",
-        currency: "",
-        availability: "",
-      },
-    ]; 
-  }
-  
+  const { data, error } = await supabase
+  .from("menus")
+  .select("*")
+  .eq("restaurant_id", userId!)
+ 
+
+console.log(data);
+
+ return data
+}
+
+export default fetchMenudata

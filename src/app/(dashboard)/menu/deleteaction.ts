@@ -1,7 +1,7 @@
 'use server'
 import { createClient } from "@/utils/supabase/server";
 
-const deleteaction = async (id: number) => {
+const deleteaction = async (id: string) => {
   const supabase = await createClient();
   const { error } = await supabase.from("menus").delete().eq("id", id);
 

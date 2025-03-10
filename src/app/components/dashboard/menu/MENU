@@ -1,0 +1,314 @@
+"use client";
+import { MouseEvent, useEffect, useState } from "react";
+import Addmenu from "./Addmenu";
+import { IMenudata, IModalData } from "../types/type";
+import { Center, Loader, Table } from "@mantine/core";
+import BaseButton from "@/app/components/ui/BaseButton";
+import { menu } from "../actions/addmenu-action";
+import BaseTable from "@/app/components/ui/BaseTable";
+import useMenuItem from "../hook/useMenuItem";
+import deletemenu from "../actions/deletemenu-action";
+import { useRouter } from "next/navigation";
+import BaseConfirmation from "@/app/components/ui/BaseConfirmation";
+import { useDisclosure } from "@mantine/hooks";
+import { useQueryClient } from "@tanstack/react-query";
+import { updateMenu } from "../actions/updatemenu-action";
+import { Skeleton } from '@mantine/core';
+
+
+const menupage = () => {
+  const [MenuItem, setMenuItem] = useState<IMenudata[]>();
+  const [selectedMenu, setSelectedMenu] = useState<IModalData | null>(null);
+  const [opened, { open, close }] = useDisclosure(false);
+  const [loading, setLoading] = useState("");
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const data = useMenuItem();
+  useEffect(() => {
+    console.log("Fetched data from useMenuItem:", data);
+    if (data) {
+      setMenuItem(data); 
+      console.log("MenuItem after sync:", data);
+    }
+  }, [data]);
+  const handleAddMenu = async (newItem: IModalData) => {
+    const addedItem = await menu(newItem);
+    if (addedItem) setMenuItem((prev) => prev?[...prev, addedItem] : [addedItem]);
+  };
+
+  const handleEditMenu = async (updatedItem: IModalData) => {
+    await updateMenu(updatedItem); // Update in Supabase
+  };
+
+  const handleDelete = async (
+    id: string,
+    event: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>
+  ) => {
+    event.stopPropagation();
+    setMenuItem((prev) => prev?.filter((item) => item.id !== id));
+    setLoading(id);
+    await deletemenu(id);
+    setLoading("");
+  };
+
+  // Transform IMenudata to IModalData when setting selectedMenu
+  const handleSelectMenuForEdit = (item: IMenudata) => {
+    const modalData: IModalData = {
+      id: item.id || "", // Ensure id is present, though it should always be string from IMenudata
+      menu_name: item.menu_name || "",
+      currency: item.currency || "",
+      status: item.status || "",
+    };
+    setSelectedMenu(modalData);
+  };
+  console.log(MenuItem)
+
+  return (
+    <div className="bg-[#fcf4e05e]">
+      <div className="flex flex-row justify-between mt-10 px-2 mb-8">
+        <h1 className="text-2xl font-bold">Menus</h1>
+        <Addmenu
+          onAddMenu={handleAddMenu}
+          onEditMenu={handleEditMenu}
+          selectedMenu={selectedMenu}
+          setSelectedMenu={setSelectedMenu}
+        />
+      </div>
+      {!MenuItem ? (
+        <Center>
+<Table highlightOnHover>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>
+                  <Skeleton height={20} width={100} style={{ backgroundColor: "#e0e0e0" }} />
+                </Table.Th>
+                <Table.Th>
+                  <Skeleton height={20} width={100} style={{ backgroundColor: "#e0e0e0" }} />
+                </Table.Th>
+                <Table.Th>
+                  <Skeleton height={20} width={100} style={{ backgroundColor: "#e0e0e0" }} />
+                </Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {[...Array(3)].map((_, index) => (
+                <Table.Tr key={index}>
+                  <Table.Td>
+                    <Skeleton height={20} width="80%" style={{ backgroundColor: "#e0e0e0" }} />
+                  </Table.Td>
+                  <Table.Td>
+                    <Skeleton height={20} width="80%" style={{ backgroundColor: "#e0e0e0" }} />
+                  </Table.Td>
+                  <Table.Td>
+                    <div className="flex gap-2">
+                      <Skeleton height={40} width="30%" style={{ backgroundColor: "#e0e0e0" }} />
+                      <Skeleton height={40} width="30%" style={{ backgroundColor: "#e0e0e0" }} />
+                      <Skeleton height={40} width="30%" style={{ backgroundColor: "#e0e0e0" }} />
+                    </div>
+                  </Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
+        </Center>
+      ) : MenuItem.length === 0 ? (
+        <p className="text-center text-gray-500 mt-4">
+          No menus available. Click "Add New Menu" to create one.
+        </p>
+      ) : (
+        <BaseTable highlightOnHover>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>MENU NAME</Table.Th>
+              <Table.Th>AVAILABILITY</Table.Th>
+              <Table.Th>ACTIONS</Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {MenuItem?.map((item) => (
+              <Table.Tr key={item.id}>
+                <Table.Td>
+                  {item.menu_name} ({item.currency})
+                </Table.Td>
+                <Table.Td>{item.status}</Table.Td>
+                <Table.Td>
+                  <div className="flex gap-2">
+                    <BaseButton
+                      className="h-12 w-1/3"
+                      classNames={{ inner: "font-sm text-white" }}
+                      onClick={() => router.push(`/menu/${item.menu_name}`)}
+                    >
+                      View
+                    </BaseButton>
+                    <BaseButton
+                      className="h-12 w-1/3"
+                      classNames={{ inner: "font-sm text-white" }}
+                      onClick={() => handleSelectMenuForEdit(item)} // Use the new handler
+                    >
+                      Edit
+                    </BaseButton>
+                    <BaseConfirmation
+                      confirmationbutton="Delete"
+                      opened={opened}
+                      onClose={close}
+                      className="h-12 w-1/3"
+                      text="Are you sure you want to delete this item?"
+                    >
+                      <BaseButton
+                        onClick={(event) => handleDelete(item.id, event)}
+                        classNames={{ root: "w-1/3 mt-6" }}
+                      >
+                        {loading === item.id ? <Loader size={23} /> : "Delete"}
+                      </BaseButton>
+                    </BaseConfirmation>
+                  </div>
+                </Table.Td>
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        </BaseTable>
+      )}
+    </div>
+  );
+};
+
+export default menupage;
+
+
+
+"use client";
+import FormField from "@/app/components/forms/FormField";
+import BaseButton from "@/app/components/ui/BaseButton";
+import BaseInput from "@/app/components/ui/BaseInput";
+import BaseSelect from "@/app/components/ui/BaseSelect";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useDisclosure } from "@mantine/hooks";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
+import BaseModal from "@/app/components/ui/BaseModal";
+import { FC, useEffect } from "react";
+import { IModalData } from "../types/type";
+
+export type IMenuModalProps = {
+  onAddMenu: (data: IModalData) => Promise<void>;
+  onEditMenu: (data: IModalData) => Promise<void>; // New prop for editing
+  selectedMenu?: IModalData | null;
+  setSelectedMenu: (menu: IModalData | null) => void;
+};
+
+const Addmenu: FC<IMenuModalProps> = ({
+  onAddMenu,
+  onEditMenu,
+  selectedMenu,
+  setSelectedMenu,
+}) => {
+  const [opened, { open, close }] = useDisclosure(false);
+
+  const AddMenuSchema = z.object({
+    menu_name: z.string().min(1, "Menu name is required"),
+    currency: z.string({ required_error: "Currency is required" }),
+    status: z.string({ required_error: "Status is required" }),
+  });
+
+  type IAddMenuData = z.infer<typeof AddMenuSchema>;
+
+  const {
+    register,
+    formState: { errors, isSubmitting },
+    handleSubmit,
+    control,
+    reset,
+  } = useForm<IAddMenuData>({
+    resolver: zodResolver(AddMenuSchema),
+    defaultValues: { menu_name: "", currency: "", status: "" },
+  });
+
+  useEffect(() => {
+    if (selectedMenu) {
+      reset(selectedMenu); // Pre-fill form with selected menu
+      open();
+    } else {
+      reset({ menu_name: "", currency: "", status: "" }); // Reset when no menu is selected
+    }
+  }, [selectedMenu, reset]);
+
+  const onSubmit = async (data: IAddMenuData) => {
+    if (selectedMenu) {
+      const updatedItem = { ...selectedMenu, ...data };
+      await onEditMenu(updatedItem); // Call edit handler
+    } else {
+      await onAddMenu(data); // Call add handler
+    }
+    close();
+    setSelectedMenu(null); // Clear selected menu
+    reset({ menu_name: "", currency: "", status: "" }); // Reset form
+  };
+
+  const handleClose = () => {
+    close();
+    setSelectedMenu(null);
+    reset({ menu_name: "", currency: "", status: "" });
+  };
+
+  return (
+    <>
+      <BaseModal
+        opened={opened}
+        onClose={handleClose}
+        title={selectedMenu ? "Edit Menu" : "Add Menu"}
+        padding="lg"
+      >
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <FormField label="Menu Name" name="menu_name" error={errors.menu_name?.message}>
+            <BaseInput type="text" placeholder="Enter menu" {...register("menu_name")} />
+          </FormField>
+          <FormField label="Currency" name="currency" error={errors.currency?.message}>
+            <Controller
+              name="currency"
+              control={control}
+              render={({ field }) => (
+                <BaseSelect placeholder="Enter currency" {...field} data={["$", "₹", "€", "¥"]} />
+              )}
+            />
+          </FormField>
+          <FormField label="Status" name="status" error={errors.status?.message}>
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <BaseSelect data={["Active", "InActive"]} placeholder="Enter status" {...field} />
+              )}
+            />
+          </FormField>
+          <BaseButton
+            type="submit"
+            loading={isSubmitting}
+            classNames={{ root: "h-12 w-full rounded-xl", inner: "font-bold text-white text-sm" }}
+          >
+            {selectedMenu ? "Update" : "Submit"}
+          </BaseButton>
+        </form>
+      </BaseModal>
+      {!selectedMenu && (
+        <BaseButton
+          onClick={() => {
+            setSelectedMenu(null);
+            reset({ menu_name: "", currency: "", status: "" });
+            open();
+          }}
+          classNames={{ root: "h-12 rounded-md", inner: "font-bold text-white text-md" }}
+        >
+          Add New Menu
+        </BaseButton>
+      )}
+    </>
+  );
+};
+
+export default Addmenu;
+
+
+
+
+
+

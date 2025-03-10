@@ -1,0 +1,109 @@
+"use server";
+
+import { createClient } from "@/app/utils/supabase/server";
+import { IModalData } from "../types/type";
+import { revalidatePath } from "next/cache";
+
+export async function updateMenu(MenuData: IModalData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const userId = user?.id;
+
+  const menudata = {
+    restaurant_id: userId,
+    menu_name: MenuData.menu_name,
+    currency: MenuData.currency,
+    status: MenuData.status,
+  };
+
+  const { data: UpdatedData } = await supabase
+    .from("menus")
+    .update(menudata)
+    .eq("id", MenuData.id!)
+    .select();
+
+  revalidatePath("/menu", "page");
+
+  return UpdatedData?.[0];
+}
+
+
+"use server";
+
+import { createClient } from "@/app/utils/supabase/server";
+import { IModalData } from "../types/type";
+import { revalidatePath } from "next/cache";
+
+export async function menu(MenuData: IModalData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const userId = user?.id;
+
+  const menudata = {
+    restaurant_id: userId,
+    menu_name: MenuData.menu_name,
+    currency: MenuData.currency,
+    status: MenuData.status,
+  };
+
+  const { data: InsertData } = await supabase
+    .from("menus")
+    .insert(menudata)
+    .select();
+
+  revalidatePath("/menu", "page");
+
+  return InsertData?.[0];
+}
+
+
+
+"use server";
+import { createClient } from "@/app/utils/supabase/server";
+import { IMenudata } from "../types/type";
+
+const fetchMenudata = async (): Promise<IMenudata[]> => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const userId = user?.id;
+
+  if (!userId) throw new Error("User not authenticated");
+
+  const { data, error } = await supabase
+    .from("menus")
+    .select("*")
+    .eq("restaurant_id", userId)
+    .order("created_at", { ascending: true }); // Sort by creation time
+
+  if (error) throw new Error(error.message);
+
+  return (data as IMenudata[]) || [];
+};
+
+export default fetchMenudata;
+
+
+
+
+
+import { useQuery } from "@tanstack/react-query";
+import fetchMenudata from "../actions/menu-fetch";
+import { IMenudata } from "../types/type";
+
+const useMenuItem = () => {
+  const { data } = useQuery({
+    queryKey: ["menu"],
+    queryFn: fetchMenudata,
+    staleTime: 1000 * 60,
+  });
+
+  return data as IMenudata[] | undefined;
+};
+
+export default useMenuItem;

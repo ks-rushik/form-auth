@@ -230,3 +230,5 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     </ThemeContext.Provider>
   );
 }
+
+dark:fill-red-white dark:stroke-white dark:bg-black

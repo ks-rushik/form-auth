@@ -232,3 +232,52 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 }
 
 dark:fill-red-white dark:stroke-white dark:bg-black
+
+import React, { useState } from "react";
+
+const TableSearch = () => {
+  const [search, setSearch] = useState("");
+  
+  const data = [
+    { name: "John Doe", age: 25, city: "New York" },
+    { name: "Jane Smith", age: 30, city: "Los Angeles" },
+    { name: "Michael Brown", age: 28, city: "Chicago" }
+  ];
+
+  const filteredData = data.filter(row =>
+    Object.values(row).some(value =>
+      value.toString().toLowerCase().includes(search.toLowerCase())
+    )
+  );
+
+  return (
+    <div>
+      <input
+        type="text"
+        placeholder="Search..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Age</th>
+            <th>City</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredData.map((row, index) => (
+            <tr key={index}>
+              <td>{row.name}</td>
+              <td>{row.age}</td>
+              <td>{row.city}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+export default TableSearch;

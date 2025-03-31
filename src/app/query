@@ -1,0 +1,236 @@
+"use client";
+import React, { useState } from "react";
+import ItemHeader from "./ItemHeader";
+import ItemTable from "./ItemTable";
+import AddItemModal, { IItemdata } from "./AddItemModal";
+import { notifications } from "@mantine/notifications";
+import { item } from "../../actions/item/additem-action";
+import { usePathname } from "next/navigation";
+import { useDisclosure } from "@mantine/hooks";
+import { updateItemOrder } from "../../actions/item/updateposition-action";
+import deleteitem from "../../actions/item/deleteitem-action";
+import useItem from "../../hooks/useItem";
+import { updateItem } from "../../actions/item/updateitem-action";
+
+const ItemPage = () => {
+  const pathname = usePathname();
+  const categoryId = pathname.split("/")[4] || "";
+  console.log(categoryId);
+   // Prevents undefined errors
+
+  // Fetch items using React Query's useInfiniteQuery
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } = useItem(categoryId);
+  
+  const items = data?.pages.flatMap((page) => page.items) || [];
+  
+  console.log(data , items);
+  
+
+  const [selectedItem, setSelectedItem] = useState<IItemdata | null>(null);
+  const [loading, setLoading] = useState<string | null>(null);
+  const [opened, { close }] = useDisclosure(false);
+
+  // Refresh data after CRUD operations
+  const refreshItems = async () => {
+    await refetch();
+  };
+
+  // Add new item
+  const handleAddItem = async (newItem: IItemdata, file?: File) => {
+    setLoading("add");
+    const addedItem = await item(newItem, categoryId, file);
+    if (addedItem) {
+      notifications.show({ message: `${newItem.name} added successfully`, color: "green" });
+      refreshItems();
+    }
+    setLoading(null);
+  };
+
+  // Move item up
+  const handleMoveUp = async (index: number) => {
+    if (index === 0) return;
+    setLoading("move");
+
+    const updatedItems = [...items];
+    [updatedItems[index - 1], updatedItems[index]] = [updatedItems[index], updatedItems[index - 1]];
+
+    await updateItemOrder({
+      id: updatedItems[index].id!,
+      position: updatedItems[index].position!,
+    });
+    await updateItemOrder({
+      id: updatedItems[index - 1].id!,
+      position: updatedItems[index - 1].position!,
+    });
+
+    refreshItems();
+    setLoading(null);
+  };
+
+  // Move item down
+  const handleMoveDown = async (index: number) => {
+    if (index >= items.length - 1) return;
+    setLoading("move");
+
+    const updatedItems = [...items];
+    [updatedItems[index], updatedItems[index + 1]] = [updatedItems[index + 1], updatedItems[index]];
+
+    await updateItemOrder({
+      id: updatedItems[index].id!,
+      position: updatedItems[index].position!,
+    });
+    await updateItemOrder({
+      id: updatedItems[index + 1].id!,
+      position: updatedItems[index + 1].position!,
+    });
+
+    refreshItems();
+    setLoading(null);
+  };
+
+  // Delete an item
+  const handleDelete = async (id: string) => {
+    setLoading(id);
+    await deleteitem(id);
+    notifications.show({ message: "Item deleted successfully", color: "red" });
+    refreshItems();
+    setLoading(null);
+  };
+
+  // Edit an item
+  const handleEditItem = async (updatedItem: IItemdata, file?: File) => {
+    setLoading("edit");
+    await updateItem(updatedItem, categoryId, file);
+    notifications.show({ message: "Item updated successfully", color: "blue" });
+    refreshItems();
+    setLoading(null);
+  };
+
+  // Select an item for editing
+  const handleSelectedItem = (item: IItemdata) => {
+    setSelectedItem(item);
+  };
+
+  return (
+    <div className="items-center px-4 sm:px-12 md:px-16 lg:px-20 xl:px-32">
+      <ItemHeader>
+        <AddItemModal
+          onAddItem={handleAddItem}
+          onEditItem={handleEditItem}
+          selectedItem={selectedItem}
+          setSelectedItem={setSelectedItem}
+        />
+      </ItemHeader>
+
+      <ItemTable
+        data={items}
+        handleMoveUp={handleMoveUp}
+        handleSelectItem={handleSelectedItem}
+        handleMoveDown={handleMoveDown}
+        handleDelete={handleDelete}
+        loading={loading!}
+        opened={opened}
+        close={close}
+      />
+
+      {hasNextPage && (
+        <button
+          onClick={() => fetchNextPage()}
+          disabled={isFetchingNextPage || loading !== null}
+          className="mt-4 p-2 bg-blue-500 text-white rounded disabled:opacity-50"
+        >
+          {isFetchingNextPage ? "Loading..." : "Load More"}
+        </button>
+      )}
+    </div>
+  );
+};
+
+export default ItemPage;
+"use server";
+import { createClient } from "@/app/utils/supabase/server";
+
+const fetchItemdata = async (categoryId: string, page: number = 1, limit: number = 10) => {
+  const supabase = await createClient();
+  const start = (page - 1) * limit;
+  const end = start + limit - 1;
+
+  const { data, error, count } = await supabase
+    .from("Items")
+    .select("*, category:category_id(menu:menu_id!inner(currency))", { count: "exact" })
+    .eq("category_id", categoryId)
+    .order("position", { ascending: true })
+    .range(start, end);
+
+  if (error) {
+    console.error("Error fetching items:", error );
+    return { items: [], hasMore: false };
+  }
+
+  console.log(data , categoryId);
+  
+  return {
+    items: data ?? [],
+    hasMore: count ? end + 1 < count : false,
+  };
+};
+
+export default fetchItemdata;
+import fetchCategoryItemData from "@/app/actions/customer/getCategoryItem";
+import getItemData from "@/app/actions/item/getItemdata";
+import fetchItemdata from "@/app/actions/item/item-fetch";
+import ItemPage from "@/app/components/item/ItemPage";
+import Navbar from "@/app/components/navbar/Navbar";
+import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
+import React from "react";
+
+const page = async ({ params }: { params: { categoryId: string; menuId: string } }) => {
+  const { categoryId, menuId } = params;
+  const queryClient = new QueryClient();
+
+  // Prefetch infinite query for paginated items
+  await queryClient.prefetchInfiniteQuery({
+    queryKey: ["Items", categoryId],
+    queryFn: ({ pageParam = 1 }) => fetchItemdata(categoryId, pageParam, 10),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.nextPage : undefined),
+  });
+
+  // Prefetch other static queries
+  await queryClient.prefetchQuery({
+    queryKey: ["CategoryItems"],
+    queryFn: () => fetchCategoryItemData(menuId),
+  });
+  await queryClient.prefetchQuery({
+    queryKey: ["Itemdata"],
+    queryFn: () => getItemData(categoryId),
+  });
+
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <Navbar />
+      <ItemPage  />
+    </HydrationBoundary>
+  );
+};
+
+export default page;
+import { useInfiniteQuery } from "@tanstack/react-query";
+import fetchItemdata from "../actions/item/item-fetch";
+
+const useItem = (categoryId: string, limit: number = 10) => {
+  console.log("Fetching Items for category:", categoryId); // Debugging log
+
+  return useInfiniteQuery({
+    queryKey: ["Items", categoryId],
+    queryFn: ({ pageParam = 1 }: { pageParam: number }) => {
+      console.log("Fetching Page:", pageParam);
+      return fetchItemdata(categoryId, pageParam, limit);
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages) => lastPage.hasMore ? allPages.length : undefined, // Fix pagination
+    staleTime: 1000 * 60, // 1 minute
+  });
+};
+
+export default useItem;

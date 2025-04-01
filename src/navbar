@@ -1,0 +1,125 @@
+// components/Navbar.tsx
+"use client";
+
+import Link from "next/link";
+import { Avatar, Menu } from "@mantine/core";
+import Image from "next/image";
+import logo2 from "../../images/logo2.png";
+import LogOut from "../auth/Logout";
+import { useState, useEffect } from "react";
+import ThemeButton from "../ui/ThemeButton";
+import { changeTheme } from "@/app/helper/changeTheme";
+
+const Navbar = () => {
+  const [theme, setTheme] = useState<"dark" | "light">("light"); // Client-side theme state
+  const [opened, setOpened] = useState(false);
+
+  // Optional: Sync initial theme (e.g., from an API or cookie on client-side mount)
+  useEffect(() => {
+    // This is a placeholder; you could fetch the initial theme if needed
+    const initialTheme = document.documentElement.classList.contains("dark")
+      ? "dark"
+      : "light";
+    setTheme(initialTheme);
+  }, []);
+
+  // Define handleThemeChange here
+  const handleThemeChange = async () => {
+    await changeTheme(); // Call the server action to update the cookie
+    setTheme((prevTheme) => (prevTheme === "dark" ? "light" : "dark")); // Update local state
+  };
+
+  // Apply theme to document
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+  }, [theme]);
+
+  return (
+    <nav
+      className={`bg-white dark:bg-neutral-950 shadow-lg py-2 px-4 flex justify-between items-center`}
+    >
+      <div className="flex items-center">
+        <Image
+          src={logo2}
+          width={100}
+          height={100}
+          alt="Website Logo"
+          className="dark:bg-black"
+        />
+      </div>
+      <div className="flex flex-row items-center">
+        <ThemeButton theme={theme} onChange={handleThemeChange} /> {/* Pass theme; we'll adjust ThemeButton */}
+
+        <Menu
+          opened={opened}
+          onChange={setOpened}
+          zIndex={0}
+          classNames={{ item: "font-[650] z-10 bg-white" }}
+        >
+          <Menu.Target>
+            <Avatar
+              src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-1.png"
+              alt="User Avatar"
+              size={"lg"}
+              classNames={{
+                root:
+                  "transition delay-100 duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 xl:mr-1",
+              }}
+            />
+          </Menu.Target>
+
+          <Menu.Dropdown
+            style={{ zIndex: 20 }}
+            className="dark:bg-black dark:border-black"
+          >
+            <Menu.Item classNames={{ item: "text-black dark:bg-gray-700 dark:text-white" }}>
+              <Link href="/userprofile" className="block px-3 py-1">
+                Profile Page
+              </Link>
+            </Menu.Item>
+            <Menu.Item component={LogOut}>LogOut</Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
+      </div>
+    </nav>
+  );
+};
+
+export default Navbar;
+
+
+// components/ui/ThemeButton.tsx
+"use client";
+
+import { Switch } from "@mantine/core";
+import React, { FC } from "react";
+import { IconSun, IconMoonStars } from "@tabler/icons-react";
+
+type IThemButtonProps = {
+  theme: "dark" | "light";
+  onChange: () => void; // Accept onChange from parent
+};
+
+const ThemeButton: FC<IThemButtonProps> = ({ theme, onChange }) => {
+  return (
+    <Switch
+      size="md"
+      color="dark.4"
+      onChange={onChange} // Use parent's handler
+      checked={theme === "dark"}
+      className="mr-1"
+      onLabel={
+        <IconSun size={16} stroke={2.5} color="var(--mantine-color-yellow-4)" />
+      }
+      offLabel={
+        <IconMoonStars
+          size={16}
+          stroke={2.5}
+          color="var(--mantine-color-blue-6)"
+        />
+      }
+    />
+  );
+};
+
+export default ThemeButton;

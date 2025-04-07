@@ -1,0 +1,315 @@
+import { Button, ButtonProps, ButtonStylesNames } from "@mantine/core";
+import { cva, VariantProps } from "class-variance-authority";
+import clsx from "clsx";
+import React, { ButtonHTMLAttributes, FC } from "react";
+
+type IBaseButtonProps = ButtonProps &
+  ButtonHTMLAttributes<HTMLButtonElement> &
+  VariantProps<typeof buttonVariants> & {
+    classNames?: Partial<Record<ButtonStylesNames, string>>;
+    soft?: boolean; // <-- Added soft prop
+  };
+
+const buttonVariants = cva(
+  "transition-130 cursor-pointer text-sm rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-bold",
+  {
+    variants: {
+      disabled: {
+        true: "cursor-not-allowed !bg-gray-400 text-gray-800",
+        false: "",
+      },
+      intent: {
+        default: "bg-gray-800 hover:bg-gray-700 text-white",
+        secondary: "bg-secondary-main hover:bg-secondary-dark text-white",
+        link: "bg-transparent text-primary-main hover:underline",
+        primary: "bg-primary-main hover:bg-primary-dark text-white",
+        info: "bg-info-main hover:bg-info-dark text-white",
+        sucess: "bg-sucess-main hover:bg-sucess-dark text-white",
+        error: "bg-error-main hover:bg-error-dark text-white",
+        warning: "bg-warning-main hover:bg-warning-dark text-black",
+        loading:
+          "bg-gray-400 min-w-16 text-gray-700 hover:bg-gray-400 hover:text-gray-700 cursor-not-allowed",
+      },
+      size: {
+        small: "text-sm px-2 py-1 h-8",
+        medium: "text-sm px-3 py-1.5 h-10",
+        large: "text-sm px-4 py-2 h-12",
+      },
+      outline: {
+        true: "",
+        false: "",
+      },
+      soft: {
+        true: "",
+        false: "",
+      },
+    },
+
+    compoundVariants: [
+      // ✅ Outline Variants
+      {
+        outline: true,
+        disabled: true,
+        class:
+          "cursor-not-allowed !bg-transparent !text-gray-500 border border-gray-300 hover:!bg-transparent hover:text-gray-500",
+      },
+      {
+        intent: "primary",
+        outline: true,
+        class:
+          "box-border border border-primary-main !text-primary-main bg-transparent hover:outline hover:outline-primary-main hover:bg-primary-lighter transition-all duration-150",
+      },
+      {
+        intent: "secondary",
+        outline: true,
+        class:
+          "box-border border border-secondary-main !text-secondary-main bg-transparent hover:outline hover:outline-secondary-main hover:bg-secondary-lighter transition-all duration-150",
+      },
+      {
+        intent: "default",
+        outline: true,
+        class:
+          "box-border !border border-gray-400 !text-gray-700 bg-transparent hover:!bg-gray-200 transition-all duration-150",
+      },
+      {
+        intent: "error",
+        outline: true,
+        class:
+          "box-border border border-error-main !text-error-main bg-transparent hover:outline hover:outline-error-main hover:bg-error-lighter transition-all duration-150",
+      },
+      {
+        intent: "warning",
+        outline: true,
+        class:
+          "box-border border border-warning-main !text-warning-main !bg-transparent hover:outline hover:outline-warning-main hover:!bg-warning-lighter transition-all duration-150",
+      },
+      {
+        intent: "info",
+        outline: true,
+        class:
+          "box-border border border-info-main !text-info-main bg-transparent hover:outline hover:outline-info-main hover:bg-info-lighter transition-all duration-150",
+      },
+      {
+        intent: "sucess",
+        outline: true,
+        class:
+          "box-border border border-sucess-main !text-sucess-main bg-transparent hover:outline hover:outline-sucess-main hover:bg-sucess-lighter transition-all duration-150",
+      },
+      {
+        intent: "loading",
+        outline: true,
+        class:
+          "box-border border border-gray-400 !text-gray-700 bg-transparent hover:outline hover:outline-gray-400 hover:bg-gray-200 transition-all duration-150",
+      },
+
+      // ✅ Soft Variants (💡 new)
+      {
+        intent: "primary",
+        soft: true,
+        class:
+          "bg-primary-lighter text-primary-main hover:bg-primary-light",
+      },
+      {
+        intent: "secondary",
+        soft: true,
+        class:
+          "bg-secondary-lighter text-secondary-main hover:bg-secondary-light",
+      },
+      {
+        intent: "default",
+        soft: true,
+        class: "bg-gray-100 text-gray-800 hover:bg-gray-200",
+      },
+      {
+        intent: "info",
+        soft: true,
+        class: "bg-info-lighter text-info-main hover:bg-info-light",
+      },
+      {
+        intent: "sucess",
+        soft: true,
+        class: "bg-sucess-lighter text-sucess-main hover:bg-sucess-light",
+      },
+      {
+        intent: "error",
+        soft: true,
+        class: "bg-error-lighter text-error-main hover:bg-error-light",
+      },
+      {
+        intent: "warning",
+        soft: true,
+        class: "bg-warning-lighter text-warning-main hover:bg-warning-light",
+      },
+    ],
+
+    defaultVariants: {
+      intent: "primary",
+      disabled: false,
+      outline: false,
+      soft: false,
+    },
+  }
+);
+
+const BaseButton: FC<IBaseButtonProps> = (props) => {
+  const {
+    classNames,
+    children,
+    intent,
+    disabled,
+    size,
+    outline,
+    soft,
+    ...other
+  } = props;
+
+  const { root, ...otherElement } = classNames || {};
+
+  return (
+    <Button
+      classNames={{
+        root: clsx(
+          buttonVariants({ intent, disabled, size, outline, soft }),
+          root
+        ),
+        ...otherElement,
+      }}
+      disabled={disabled}
+      {...other}
+    >
+      {children}
+    </Button>
+  );
+};
+
+export default BaseButton;
+
+
+ <BaseLayout title="Contained">
+        <Grid gutter={"md"}>
+          <GridCol
+            className="space-x-4 border-2 border-gray-200 rounded-xl flex flex-wrap "
+            span={6}
+          >
+            {/* <p>Base</p> */}
+            <BaseButton intent="default">Default</BaseButton>
+            <BaseButton intent="primary">Primary</BaseButton>
+            <BaseButton intent="secondary">Secondary</BaseButton>
+            <BaseButton disabled>Disabled</BaseButton>
+            <BaseButton intent="default">Link</BaseButton>
+          </GridCol>
+          <GridCol className="space-x-4 mt-6" span={6}>
+            <p>Colors</p>
+            <BaseButton intent="default">Default</BaseButton>
+            <BaseButton intent="primary">Primary</BaseButton>
+            <BaseButton intent="secondary">Secondary</BaseButton>
+            <BaseButton intent="info">Info</BaseButton>
+            <BaseButton intent="sucess">Success</BaseButton>
+            <BaseButton intent="warning">Warning</BaseButton>
+            <BaseButton intent="error">Error</BaseButton>
+          </GridCol>
+          <GridCol className="space-x-4 mt-6" span={6}>
+            <p>with icon and loading</p>
+            <BaseButton
+              intent="error"
+              leftSection={<MdOutlineMailOutline size={20} />}
+            >
+              Icon Left
+            </BaseButton>
+            <BaseButton
+              intent="error"
+              rightSection={<MdOutlineMailOutline size={20} />}
+            >
+              Icon Right
+            </BaseButton>
+            <BaseButton
+              intent="loading"
+              loading
+              loaderProps={{ size: "xs", color: "gray" }}
+            />
+            <BaseButton
+              intent="loading"
+              loading
+              loaderProps={{ children: "Loading..." }}
+              classNames={{ inner: "w-20" }}
+            ></BaseButton>
+            <BaseButton
+              intent="loading"
+              leftSection={<Loader size="xs" color="gray" />}
+              disabled
+              size="medium"
+            >
+              Start
+            </BaseButton>
+
+            <BaseButton
+              intent="loading"
+              disabled
+              rightSection={<Loader size="xs" color="gray" />}
+              size="medium"
+            >
+              End
+            </BaseButton>
+          </GridCol>
+          <GridCol className="space-x-4 mt-6 " span={6}>
+            <p>sizes</p>
+            <BaseButton intent={"info"} size="small">
+              Small
+            </BaseButton>
+            <BaseButton intent={"info"} size="medium">
+              Medium
+            </BaseButton>
+            <BaseButton intent={"info"} size="large">
+              Large
+            </BaseButton>
+            <BaseButton
+              intent="loading"
+              size="small"
+              disabled
+              leftSection={<Loader size={"xs"} color="gray" />}
+            >
+              Small
+            </BaseButton>
+            <BaseButton
+              intent="loading"
+              size="medium"
+              disabled
+              leftSection={<Loader size={"xs"} color="gray" />}
+            >
+              Medium
+            </BaseButton>
+            <BaseButton
+              intent="loading"
+              size="large"
+              disabled
+              leftSection={<Loader size={"xs"} color="gray" />}
+            >
+              Large
+            </BaseButton>
+            <BaseButton
+              intent="loading"
+              size="small"
+              disabled
+              rightSection={<Loader size={"xs"} color="gray" />}
+            >
+              Small
+            </BaseButton>
+            <BaseButton
+              intent="loading"
+              size="medium"
+              disabled
+              rightSection={<Loader size={"xs"} color="gray" />}
+            >
+              Medium
+            </BaseButton>
+            <BaseButton
+              intent="loading"
+              size="large"
+              disabled
+              rightSection={<Loader size={"xs"} color="gray" />}
+            >
+              Large
+            </BaseButton>
+          </GridCol>
+        </Grid>
+      </BaseLayout>

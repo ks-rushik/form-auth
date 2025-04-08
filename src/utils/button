@@ -313,3 +313,6 @@ export default BaseButton;
           </GridCol>
         </Grid>
       </BaseLayout>
+
+
+data-[grouped=true]:border-l data-[grouped=true]:border-gray-300 data-[position=left]:!border-l-0

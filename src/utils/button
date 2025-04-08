@@ -316,3 +316,54 @@ export default BaseButton;
 
 
 data-[grouped=true]:border-l data-[grouped=true]:border-gray-300 data-[position=left]:!border-l-0
+
+import React, { useState } from "react";
+import { Autocomplete, AutocompleteProps } from "@mantine/core";
+
+type AutoCompleteInputProps = AutocompleteProps & {
+  data: string[];
+};
+
+const AutoCompleteInput: React.FC<AutoCompleteInputProps> = ({
+  data,
+  value,
+  onChange,
+  placeholder = "Type to search...",
+  clearable = true,
+  ...rest
+}) => {
+  const [internalValue, setInternalValue] = useState("");
+
+  const handleChange = (val: string) => {
+    setInternalValue(val);
+    onChange?.(val);
+  };
+
+  return (
+    <Autocomplete
+      data={data}
+      value={value ?? internalValue}
+      onChange={handleChange}
+      placeholder={placeholder}
+      clearable={clearable}
+      {...rest}
+    />
+  );
+};
+
+export default AutoCompleteInput;
+
+import AutoCompleteInput from "@/components/AutoCompleteInput";
+
+const cities = ["New York", "London", "Tokyo", "Paris", "Berlin"];
+
+export default function Demo() {
+  return (
+    <div className="max-w-sm">
+      <AutoCompleteInput
+        data={cities}
+        placeholder="Select a city"
+      />
+    </div>
+  );
+}

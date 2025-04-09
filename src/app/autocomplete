@@ -1,0 +1,107 @@
+type ComboItem = {
+  text: string;
+  image: string;
+  output: string;
+};
+
+data: ComboItem[];
+value?: ComboItem | null;
+onValueChange?: (value: ComboItem | null) => void;
+
+
+2. 🎯 Add a getOptionLabel prop
+Update your props:
+
+ts
+Copy
+Edit
+getOptionLabel?: (item: ComboItem) => string;
+This function tells the component how to display each item.
+
+Example usage:
+
+tsx
+Copy
+Edit
+<BaseComboBox
+  data={myArray}
+  getOptionLabel={(item) => item.image} // or .text or .output
+  ...
+/>
+3. 🧠 Apply getOptionLabel in your code
+Set a default fallback:
+
+ts
+Copy
+Edit
+const getOptionLabel = props.getOptionLabel || ((item: ComboItem) => item.output);
+4. 🧹 Filtering options
+Replace the filtering logic:
+
+ts
+Copy
+Edit
+const shouldFilterOptions = data.every((item) => getOptionLabel(item) !== search);
+const filteredOptions = shouldFilterOptions
+  ? data.filter((item) =>
+      getOptionLabel(item).toLowerCase().includes(search.toLowerCase().trim())
+    )
+  : data;
+5. 🔽 Map dropdown options
+tsx
+Copy
+Edit
+const optiondata = filteredOptions.map((item) => {
+  const label = getOptionLabel(item);
+  const isActive = label === getOptionLabel(value!);
+
+  return (
+    <ComboboxOption
+      key={label}
+      value={label}
+      className={`px-2 py-1 ${
+        isActive
+          ? "bg-gradient-to-tr from-error-main/14 via-white to-info-main/14"
+          : ""
+      }`}
+      onMouseDown={() => {
+        setValue(item);
+        setSearch(label);
+        combobox.closeDropdown();
+      }}
+    >
+      {label}
+    </ComboboxOption>
+  );
+});
+6. 🎯 Handle dropdown submit
+tsx
+Copy
+Edit
+onOptionSubmit={(val) => {
+  const selected = data.find((item) => getOptionLabel(item) === val);
+  setValue(selected || null);
+  setSearch(val);
+  combobox.closeDropdown();
+}}
+7. 🪄 Auto-initialize search on load
+tsx
+Copy
+Edit
+useEffect(() => {
+  if (value && search === "") {
+    setSearch(getOptionLabel(value));
+  }
+}, [value]);
+✅ Result
+You can now use the component like:
+
+tsx
+Copy
+Edit
+<BaseComboBox
+  data={myArray}
+  value={selectedItem}
+  onValueChange={setSelectedItem}
+  getOptionLabel={(item) => item.text} // or image or output!
+/>

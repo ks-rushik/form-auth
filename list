@@ -1,0 +1,75 @@
+import {
+  NavLink,
+  Collapse,
+  List,
+  ListItem,
+} from "@mantine/core";
+import { useState } from "react";
+import { IconChevronUp, IconChevronDown } from "@tabler/icons-react";
+import { IconInbox, IconStar, IconFile } from "@tabler/icons-react";
+
+const NestedSidebar = () => {
+  const [opened, setOpened] = useState(true);
+
+  return (
+    <div className="w-full">
+      {/* Top-level NavLink */}
+      <NavLink
+        label="Inbox"
+        leftSection={<IconInbox size={16} />}
+        rightSection={
+          opened ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />
+        }
+        onClick={() => setOpened((o) => !o)}
+        className="text-sm font-semibold text-gray-800"
+      />
+
+      {/* Nested Collapse Section */}
+      <Collapse in={opened}>
+        <List className="ml-5 mt-2">
+          <ListItem icon={<IconStar size={16} />}>Starred</ListItem>
+          <ListItem icon={<IconFile size={16} />}>Drafts</ListItem>
+        </List>
+      </Collapse>
+    </div>
+  );
+};
+
+export default NestedSidebar;
+
+
+import { List, ListItem, UnstyledButton } from "@mantine/core";
+import { useState } from "react";
+import { IconChevronUp, IconChevronDown } from "@tabler/icons-react";
+import clsx from "clsx";
+import BaseList from "./BaseList"; // Assuming your BaseList is in the same folder
+
+const NestedSidebar = () => {
+  const [opened, setOpened] = useState(true);
+
+  return (
+    <BaseList>
+      {/* Parent item with toggle */}
+      <UnstyledButton
+        onClick={() => setOpened(!opened)}
+        className="flex items-center justify-between w-full text-[14px] font-semibold text-gray-800 pb-4"
+      >
+        <div className="flex items-center gap-2">
+          <SvgIcon1 />
+          Inbox
+        </div>
+        {opened ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+      </UnstyledButton>
+
+      {/* Nested items */}
+      {opened && (
+        <div className="ml-7">
+          <ListItem icon={<StarIcon />}>Starred</ListItem>
+          <ListItem icon={<ListIcon2 />}>Drafts</ListItem>
+        </div>
+      )}
+    </BaseList>
+  );
+};
+
+export default NestedSidebar;

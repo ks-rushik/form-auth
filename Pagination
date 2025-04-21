@@ -55,3 +55,162 @@ const PaginatedGrid = () => {
 };
 
 export default PaginatedGrid;
+
+
+import {
+  Pagination,
+  PaginationProps,
+  PaginationStylesNames,
+  Select,
+} from "@mantine/core";
+import { cva, VariantProps } from "class-variance-authority";
+import clsx from "clsx";
+import React, { FC, useEffect, useMemo, useState } from "react";
+
+type IBasePaginationProps = PaginationProps &
+  VariantProps<typeof PaginationVariants> & {
+    classNames?: Partial<Record<PaginationStylesNames, string>>;
+    items: any[];                           // full list of items
+    itemsPerPageOptions?: number[];         // dropdown options
+    initialItemsPerPage?: number;           // default value
+    onItemsChange?: (paginatedItems: any[]) => void; // notify parent
+    renderItems?: (items: any[]) => React.ReactNode; // optional custom render
+  };
+
+const PaginationVariants = cva("", {
+  variants: {
+    intent: {
+      default: "data-active:bg-black data-active:border-black",
+      primary: "data-active:bg-primary-main data-active:border-primary-main",
+      // add more...
+    },
+    soft: {
+      true: "bg-transparent border-none data-active:bg-transparent data-active:text-black",
+      false: "",
+    },
+    filled: {
+      true: "border-none",
+      false: "",
+    },
+    disabled: {
+      true: "cursor-not-allowed",
+      false: "",
+    },
+  },
+  defaultVariants: {
+    intent: "default",
+    soft: false,
+    filled: false,
+  },
+});
+
+const BasePagination: FC<IBasePaginationProps> = ({
+  classNames,
+  intent,
+  disabled,
+  soft,
+  filled,
+  items,
+  onItemsChange,
+  renderItems,
+  itemsPerPageOptions = [4, 8, 12, 16, 20],
+  initialItemsPerPage = 12,
+  ...other
+}) => {
+  const [activePage, setActivePage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(initialItemsPerPage);
+
+  const totalPages = Math.ceil(items.length / itemsPerPage);
+
+  const paginatedItems = useMemo(() => {
+    const start = (activePage - 1) * itemsPerPage;
+    const end = activePage * itemsPerPage;
+    return items.slice(start, end);
+  }, [items, activePage, itemsPerPage]);
+
+  // Notify parent if needed
+  useEffect(() => {
+    onItemsChange?.(paginatedItems);
+  }, [paginatedItems]);
+
+  return (
+    <div className="space-y-4">
+      {/* Optional: Render Items */}
+      {renderItems ? (
+        renderItems(paginatedItems)
+      ) : (
+        <div className="grid grid-cols-4 gap-4">
+          {paginatedItems.map((item, index) => (
+            <div
+              key={index}
+              className="h-20 flex items-center justify-center rounded-md border text-gray-500 bg-gray-50"
+            >
+              {item}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Pagination controls + dropdown */}
+      <div className="flex justify-between items-center">
+        <Pagination
+          total={totalPages}
+          value={activePage}
+          onChange={setActivePage}
+          radius="lg"
+          classNames={{
+            control: clsx(
+              PaginationVariants({ intent, disabled, soft, filled }),
+              classNames?.control
+            ),
+            ...classNames,
+          }}
+          disabled={disabled}
+          {...other}
+        />
+
+        <Select
+          label="Items per page"
+          data={itemsPerPageOptions.map((n) => n.toString())}
+          value={itemsPerPage.toString()}
+          onChange={(val) => {
+            const num = Number(val);
+            setItemsPerPage(num);
+            setActivePage(1); // reset to page 1
+          }}
+          className="w-32"
+        />
+      </div>
+    </div>
+  );
+};
+
+export default BasePagination;
+
+Now you can use it like this:
+
+tsx
+Copy
+Edit
+const ITEMS = Array.from({ length: 100 }, (_, i) => i + 1);
+
+<BasePagination
+  items={ITEMS}
+  intent="primary"
+  filled
+/>
+Or if you want to render your own cards:
+
+tsx
+Copy
+Edit
+<BasePagination
+  items={ITEMS}
+  renderItems={(items) => (
+    <div className="grid grid-cols-4 gap-4">
+      {items.map((item) => (
+        <div key={item} className="bg-gray-100 p-4 rounded">{item}</div>
+      ))}
+    </div>
+  )}
+/>

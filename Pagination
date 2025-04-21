@@ -1,0 +1,57 @@
+import React, { useState } from "react";
+import BasePagination from "./BasePagination"; // your custom component
+import { Select } from "@mantine/core";
+
+const ITEMS = Array.from({ length: 100 }, (_, i) => i + 1); // Demo list
+
+const PaginatedGrid = () => {
+  const [activePage, setActivePage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(12);
+
+  const totalPages = Math.ceil(ITEMS.length / itemsPerPage);
+
+  const displayedItems = ITEMS.slice(
+    (activePage - 1) * itemsPerPage,
+    activePage * itemsPerPage
+  );
+
+  return (
+    <div className="p-4">
+      <h2 className="text-xl font-semibold mb-4">Items</h2>
+
+      {/* Grid Display */}
+      <div className="grid grid-cols-4 gap-4 mb-6">
+        {displayedItems.map((item) => (
+          <div
+            key={item}
+            className="h-20 flex items-center justify-center rounded-md border text-gray-500 bg-gray-50"
+          >
+            {item}
+          </div>
+        ))}
+      </div>
+
+      {/* Pagination + Items Per Page */}
+      <div className="flex justify-between items-center">
+        <BasePagination
+          total={totalPages}
+          value={activePage}
+          onChange={setActivePage}
+        />
+
+        <Select
+          label="Items per page"
+          data={["4", "8", "12", "16", "20"]}
+          value={itemsPerPage.toString()}
+          onChange={(value) => {
+            setItemsPerPage(Number(value));
+            setActivePage(1); // Reset to page 1
+          }}
+          className="w-32"
+        />
+      </div>
+    </div>
+  );
+};
+
+export default PaginatedGrid;

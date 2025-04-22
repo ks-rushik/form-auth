@@ -1,0 +1,253 @@
+// hooks/useMenuItem.ts
+import { useQuery } from "@tanstack/react-query";
+import fetchMenudata from "../actions/menu/menu-fetch";
+
+const useMenuItem = (search: string, status: string) => {
+  const { data } = useQuery({
+    queryKey: ["menu", search, status],
+    queryFn: () => fetchMenudata(search, status),
+    staleTime: Infinity,
+  });
+
+  return data;
+};
+
+export default useMenuItem;
+
+
+// MenuPage.tsx
+"use client";
+import { useState } from "react";
+import { useDisclosure } from "@mantine/hooks";
+import { useRouter } from "next/navigation";
+import useMenuItem from "../../hooks/useMenuItem";
+import Addmenu from "./AddMenuModal";
+import MenuHeader from "./MenuHeader";
+import MenuTable from "./MenuTable";
+import deletemenu from "../../actions/menu/deletemenu-action";
+import { IMenudata, IModalData } from "../../type/type";
+import { menu } from "../../actions/menu/addmenu-action";
+import { updateMenu } from "../../actions/menu/updatemenu-action";
+import { notifications } from "@mantine/notifications";
+
+const Menupage = () => {
+  const [selectedMenu, setSelectedMenu] = useState<IModalData | null>(null);
+  const [opened, { close }] = useDisclosure(false);
+  const [loading, setLoading] = useState("");
+  const [searchData, setSearchData] = useState("");
+  const [filterStatus, setFilterStatus] = useState<string>("");
+
+  const data = useMenuItem(searchData, filterStatus);
+  const router = useRouter();
+
+  const handleAddMenu = async (newItem: IModalData) => {
+    const addedItem = await menu(newItem);
+    notifications.show({ message: `${newItem.menu_name} added to menus` });
+  };
+
+  const handleEditMenu = async (updatedmenu: IModalData) => {
+    await updateMenu(updatedmenu);
+    notifications.show({ message: "Menu updated" });
+  };
+
+  const handleDelete = async (
+    id: string,
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.stopPropagation();
+    setLoading(id);
+    await deletemenu(id);
+    setLoading("");
+  };
+
+  const handleView = (menu_name: string, id: string) => {
+    router.push(`/menu/${id}`);
+  };
+
+  const handleSelectMenu = (item: IMenudata) => {
+    const modaldata: IModalData = {
+      id: item.id || "",
+      menu_name: item.menu_name || "",
+      currency: item.currency || "",
+      status: item.status || "",
+    };
+    setSelectedMenu(modaldata);
+  };
+
+  return (
+    <div className="items-center px-4 sm:px-12 md:px-16 lg:px-20 xl:px-32">
+      <MenuHeader>
+        <Addmenu
+          onAddMenu={handleAddMenu}
+          onEditMenu={handleEditMenu}
+          selectedMenu={selectedMenu}
+          setSelectedMenu={setSelectedMenu}
+        />
+      </MenuHeader>
+      <MenuTable
+        data={data}
+        handleView={handleView}
+        handleSelectMenu={handleSelectMenu}
+        handleDelete={handleDelete}
+        loading={loading}
+        opened={opened}
+        close={close}
+        searchData={searchData}
+        setSearchData={setSearchData}
+        filterStatus={filterStatus}
+        setFilterStatus={setFilterStatus}
+      />
+    </div>
+  );
+};
+
+export default Menupage;
+
+
+
+
+// MenuTable.tsx
+import { FC } from "react";
+import BaseTable from "@/app/components/ui/BaseTable";
+import Loader from "@/app/components/ui/BaseLoader";
+import formatDate from "@/app/utils/formatdate";
+import { IMenudata } from "@/app/type/type";
+import MenuActions from "./MenuActions";
+import SearchInput from "../SearchInput";
+import FilteredData from "../FilterData";
+import SearchFilter from "../SearchFilter";
+
+type IMenuTableProps = {
+  data: IMenudata[] | undefined | null;
+  handleView: (menu_name: string, id: string) => void;
+  handleSelectMenu: (item: IMenudata) => void;
+  handleDelete: (
+    id: string,
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => void;
+  loading: string;
+  opened: boolean;
+  close: () => void;
+  searchData: string;
+  setSearchData: (val: string) => void;
+  filterStatus: string;
+  setFilterStatus: (val: string) => void;
+};
+
+const MenuTable: FC<IMenuTableProps> = ({
+  data,
+  handleView,
+  handleSelectMenu,
+  handleDelete,
+  loading,
+  opened,
+  close,
+  searchData,
+  setSearchData,
+  filterStatus,
+  setFilterStatus,
+}) => {
+  return !data ? (
+    <Loader />
+  ) : data.length === 0 ? (
+    <p className="text-center text-gray-500 mt-4">
+      No Menu available. Click "Add New Menu" to create one.
+    </p>
+  ) : (
+    <>
+      <SearchFilter>
+        <SearchInput
+          value={searchData}
+          onChange={(e) => setSearchData(e.target.value)}
+          placeholder="Search menu..."
+        />
+        <FilteredData
+          value={filterStatus}
+          onChange={(value) => setFilterStatus(value || "")}
+        />
+      </SearchFilter>
+
+      {data.length === 0 ? (
+        <p className="text-center text-gray-500 mt-4">
+          No matching menus found.
+        </p>
+      ) : (
+        <BaseTable
+          data={data}
+          getKey={(item) => item.id}
+          columns={[
+            {
+              label: "MENU NAME",
+              render: (item) => `${item.menu_name} (${item.currency})`,
+            },
+            {
+              label: "AVAILABILITY",
+              render: (item) =>
+                item.status === "Not Available" ? (
+                  <p className="text-red-500">Not Available</p>
+                ) : (
+                  <p className="text-green-600">Available</p>
+                ),
+            },
+            {
+              label: "CREATED AT",
+              render: (item) => formatDate(item.created_at),
+            },
+            {
+              label: "UPDATED AT",
+              render: (item) => formatDate(item.updated_at),
+            },
+            {
+              label: "",
+              render: (item) => (
+                <MenuActions
+                  item={item}
+                  handleView={handleView}
+                  handleSelectMenu={handleSelectMenu}
+                  handleDelete={handleDelete}
+                  loading={loading}
+                  opened={opened}
+                  close={close}
+                />
+              ),
+            },
+          ]}
+        />
+      )}
+    </>
+  );
+};
+
+export default MenuTable;
+
+
+// actions/menu/menu-fetch.ts
+"use server";
+import { createClient } from "@/app/utils/supabase/server";
+
+const fetchMenudata = async (search: string, status: string) => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const userId = user?.id;
+  let query = supabase
+    .from("menus")
+    .select("*")
+    .eq("restaurant_id", userId!)
+    .order("created_at", { ascending: true });
+
+  if (search) {
+    query = query.ilike("menu_name", `%${search}%`);
+  }
+
+  if (status === "Available" || status === "Not Available") {
+    query = query.eq("status", status);
+  }
+
+  const { data } = await query;
+  return data;
+};
+
+export default fetchMenudata;

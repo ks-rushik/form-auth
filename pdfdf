@@ -1,0 +1,384 @@
+import { Collapse, Divider } from "@mantine/core";
+import React, { FC, useEffect, useRef, useState } from "react";
+import { IItemdata } from "../item/AddItemModal";
+import { FaAngleUp, FaAngleDown } from "react-icons/fa";
+import useShortUrl from "../../hooks/useUrl";
+import ThemeButton from "../ui/ThemeButton";
+import CustomerSideLocation from "./CustomerSideLocation";
+import { changeTheme } from "@/app/helper/changeTheme";
+import BaseTextField from "../ui/BaseInput";
+import { IoSearch } from "react-icons/io5";
+
+type ICustomerSideBodyProps = {
+  categories: any[] | null | undefined;
+  id: string;
+};
+
+const CustomerSideBody: FC<ICustomerSideBodyProps> = ({ categories, id }) => {
+  const [theme, setTheme] = useState<"dark" | "light">();
+  const [mounted, setMounted] = useState(false);
+  const [value, setValue] = useState("");
+
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const initialTheme = document.documentElement.classList.contains("dark")
+      ? "dark"
+      : "light";
+    setTheme(initialTheme);
+    setMounted(true);
+  }, []);
+
+  const handleThemeChange = async () => {
+    await changeTheme();
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  };
+
+  useEffect(() => {
+    if (theme) {
+      document.documentElement.classList.toggle("dark", theme === "dark");
+    }
+  }, [theme]);
+
+  const urldata = useShortUrl(id);
+  const urlid = urldata?.[0]?.menu_id;
+
+  const currency = categories
+    ?.map((item) => item.menus)
+    .find((menu) => menu?.id === urlid)?.currency;
+  console.log(categories, "category");
+  const profilename = categories?.[0].menus.restaurant_id.name;
+  const profileImage = categories?.[0].menus.restaurant_id.logo;
+
+  const contact = categories?.[0]?.menus?.restaurant_id?.phone;
+  const location = categories?.[0]?.menus?.restaurant_id?.address;
+  const email = categories?.[0]?.menus?.restaurant_id?.email;
+
+  const [openCategories, setOpenCategories] = useState<string[]>(
+    categories ? categories.map((category) => category.id) : []
+  );
+
+  const handleToggle = (categoryId: string, event: React.MouseEvent) => {
+    setOpenCategories((prev) =>
+      prev.includes(categoryId)
+        ? prev.filter((id) => id !== categoryId)
+        : [...prev, categoryId]
+    );
+  };
+
+  const filteredCategories = categories
+    ?.map((category) => {
+      const filteredItems = category.Items?.filter((item: IItemdata) =>
+        item.name?.toLowerCase().includes(value.toLowerCase())
+      );
+      return { ...category, filteredItems };
+    })
+    .filter(
+      (category) =>
+        category.status === "Available" &&
+        category.filteredItems &&
+        category.filteredItems.length > 0
+    );
+
+  const noMenusFound = filteredCategories?.length === 0;
+
+  const handleDownloadPDF = async () => {
+    if (menuRef.current) {
+      const html2pdf = (await import("html2pdf.js")).default;
+
+      html2pdf()
+        .from(menuRef.current)
+        .set({
+          margin: 0.5,
+          filename: "Menu.pdf",
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: {
+            unit: "in",
+            format: "a4",
+            orientation: "portrait",
+            compress: true,
+            pageSize: "A4",
+          },
+          pagebreak: { mode: ["css", "legacy"] },
+        })
+        .save();
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      {mounted && theme && (
+        <ThemeButton theme={theme} onChange={handleThemeChange} />
+      )}
+
+      <BaseTextField
+        value={value}
+        placeholder="Search menu..."
+        onChange={(e) => setValue((e.target as HTMLInputElement).value)}
+        leftSection={
+          <IoSearch
+            size={20}
+            className="hover:text-gray-700 dark:hover:text-gray-400 "
+          />
+        }
+      />
+
+      {noMenusFound ? (
+        <div className="text-center text-gray-500 dark:text-gray-300 font-medium text-lg">
+          No Menus Found
+        </div>
+      ) : (
+        filteredCategories?.map((category) => (
+          <div
+            key={category.id}
+            onClick={(event) => handleToggle(category.id, event)}
+          >
+            <div className="bg-white p-4 rounded-lg shadow-2x dark:bg-gray-800">
+              <p className="font-bold text-lg sm:text-2xl text-gray-800 dark:text-white flex justify-between items-center cursor-pointer hover:text-blue-600 transition-all duration-300 pt-2">
+                {category.category_name}
+                <span className="text-gray-500 text-sm">
+                  {openCategories.includes(category.id) ? (
+                    <FaAngleUp />
+                  ) : (
+                    <FaAngleDown />
+                  )}
+                </span>
+              </p>
+
+                <div className="mt-2 flex justify-center flex-wrap md:justify-start gap-4">
+                  {category.filteredItems.map((item: IItemdata) => (
+                    <Collapse
+                      in={openCategories.includes(category.id)}
+                      key={item.id}
+                    >
+                      <CustomerSideCard item={item} currency={currency} />
+                    </Collapse>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+
+        <CustomerSideLocation
+          location={location}
+          email={email}
+          contact={contact}
+        />
+        <div className="flex flex-row justify-between">
+          <p>h</p>
+          <p>g</p>
+          <p>h</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CustomerSideBody;
+
+
+import { Divider } from "@mantine/core";
+import React, { forwardRef } from "react";
+import PdfSideCard from "./PdfCard";
+import PdfSideHeader from "./PdfHeader";
+import PdfSideLocation from "./PdfLocation";
+
+type MenuContentProps = {
+  filteredCategories: any[] | undefined;
+  openCategories: string[];
+  currency: string;
+  handleToggle: (categoryId: string, event: React.MouseEvent) => void;
+  logo: string;
+  name: string;
+};
+
+const Pdf = forwardRef<HTMLDivElement, MenuContentProps>(
+  ({ filteredCategories, currency, handleToggle, logo, name }, ref) => {
+    const contact = filteredCategories?.[0]?.menus?.restaurant_id?.phone;
+    const location = filteredCategories?.[0]?.menus?.restaurant_id?.address;
+    const email = filteredCategories?.[0]?.menus?.restaurant_id?.email;
+
+    return (
+      <div ref={ref} className="container px-4 mx-auto  mb-10">
+        <PdfSideHeader logo={logo} name={name} />
+        <Divider size="sm" />
+        <p className="text-4xl text-center tracking-widest font-thin pb-6">
+          MENU
+        </p>
+        <Divider size="sm" className="mt-4" />
+
+        {filteredCategories?.map((category) => (
+          <div
+            key={category.id}
+            onClick={(event) => handleToggle(category.id, event)}
+          >
+            <div className="bg-white p-4 rounded-lg shadow-2x dark:bg-gray-800">
+              <p className="font-bold text-lg sm:text-2xl text-gray-800 dark:text-white flex justify-between items-center cursor-pointer hover:text-blue-600 transition-all duration-300 pt-2">
+                {category.category_name}
+              </p>
+
+              <div className="mt-2 flex justify-center flex-wrap md:justify-start gap-4">
+                {category.filteredItems.map((item: any) => (
+                  <PdfSideCard item={item} key={item.id} currency={currency} />
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+        <PdfSideLocation location={location} email={email} contact={contact} />
+      </div>
+    );
+  }
+);
+
+export default Pdf;
+
+
+import { Badge, Card, Text } from "@mantine/core";
+import Image from "next/image";
+import React, { FC } from "react";
+import { IItemdata } from "../item/AddItemModal";
+
+type IPdfSideCard = {
+  item: IItemdata;
+  currency: string;
+};
+
+const PdfSideCard: FC<IPdfSideCard> = (props) => {
+  const { item, currency } = props;
+
+  return (
+    <Card
+      shadow="sm"
+      className="h-full flex flex-col w-60 dark:bg-gray-600 no-page-break relative" 
+    >
+      <div className=" max-w-xs overflow-hidden bg-cover bg-no-repeat ">
+        <Image
+          src={
+            typeof item.image === "string"
+              ? item.image
+              : URL.createObjectURL(item.image as Blob)
+          }
+          width={500}
+          height={500}
+          alt="Website Logo"
+          className="w-full max-h-44 min-h-56 object-cover transition no-page-break duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-black/30"
+          priority
+        />
+      </div>
+      <div className="flex flex-row justify-between pt-2 dark:text-white">
+        <Text className="font-semibold text-base sm:text-xl">{item.name}</Text>
+        <Text className="font-bold text-base sm:text-xl dark:text-white">
+          {currency}
+          {item.price}
+        </Text>
+      </div>
+
+      <Text className="text-sm text-gray-500 font-mono mt-3 cursor-pointer dark:text-white">
+        {item.description}
+      </Text>
+
+      {item.status === "Not Available" && (
+        <Badge
+          color="red"
+          variant="filled"
+          classNames={{
+            root: "absolute top-4 right-4 flex items-center rounded-sm",
+          }}
+          style={{
+            top: "1rem", // Adjust top position to suit your needs
+          }}
+        >
+          NOT AVAILABLE
+        </Badge>
+      )}
+    </Card>
+  );
+};
+
+export default PdfSideCard;
+
+
+"use client";
+import React, { FC } from "react";
+import Image from "next/image";
+import LeftSideImage from "@/app/images/LeftSideImage";
+import RightSideImage from "@/app/images/RightSideImage";
+
+type IPdfHeaderProps = {
+  logo: string;
+  name: string;
+};
+const PdfSideHeader: FC<IPdfHeaderProps> = (props) => {
+  const { logo, name } = props;
+  return (
+    <div className="flex justify-between">
+      <LeftSideImage />
+
+      <div className="flex flex-col items-center w-full max-w-xs sm:max-w-md md:max-w-lg">
+        <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28">
+          <Image
+            src={logo}
+            alt="logo"
+            width={100}
+            height={100}
+            className="rounded-full border-2 border-gray-300 shadow-md object-cover"
+          />
+        </div>
+
+        <h1 className="text-lg sm:text-2xl md:text-3xl pb-4 text-gray-800 text-center tracking-wide font-extrabold dark:text-white">
+          {name}
+        </h1>
+      </div>
+      <RightSideImage />
+    </div>
+  );
+};
+
+export default PdfSideHeader;
+
+import { Paper } from "@mantine/core";
+import React, { FC } from "react";
+
+type IPdfSideLocation = {
+  location: string;
+  email: string;
+  contact: string;
+};
+
+const PdfSideLocation:FC<IPdfSideLocation> = (props) => {
+  const { location, email, contact } = props;
+  return (
+    <Paper
+      shadow="md"
+      radius="lg"
+      withBorder
+      p="xl"
+      className="h-full flex flex-col rounded-lg dark:bg-gray-800 dark:border-gray-800 "
+    >
+      <h2 className="mb-3 font-semibold text-base sm:text-xl w-1/2 dark:text-white ">
+        Our Location
+      </h2>
+      <div className="flex justify-between sm:flex-row flex-col gap-y-3 text-center items-center ">
+        <p className="text-gray-500  text-base  font-mono  cursor-pointer dark:text-white">
+          {location}
+        </p>
+        <div className="flex-row">
+          <p className="text-blue-400 font-serif font-semibold opacity-70 dark:text-blue-400">
+            {email}
+          </p>
+          <p
+            className="text-gray-800 text-base font-mono cursor-pointer dark:text-white"
+            title="Contact number"
+          >
+            +91 {contact}
+          </p>
+        </div>
+      </div>
+    </Paper>
+  );
+};
+
+export default PdfSideLocation;

@@ -1,0 +1,72 @@
+npm install -D prettier eslint-plugin-prettier eslint-config-prettier  --legacy-peer-deps
+ npm install -D eslint eslint-plugin-simple-import-sort  --legacy-peer-deps
+
+.eslintrc.js
+module.exports = {
+    root: true,
+    parser: '@typescript-eslint/parser',
+    plugins: ['simple-import-sort', 'import', 'prettier'],
+    extends: [
+      'eslint:recommended',
+      'plugin:react/recommended',
+      'plugin:prettier/recommended',  // Prettier integration
+    ],
+    rules: {
+      'simple-import-sort/imports': 'off', // Disable simple-import-sort
+      'import/order': [
+        'warn',
+        {
+          groups: [
+            ['builtin', 'external', 'internal'], // External libraries
+            ['parent', 'sibling', 'index'], // Internal components and imports
+            'object', // Object imports (e.g., CSS)
+          ],
+          alphabetize: {
+            order: 'asc', // Sort groups alphabetically
+            caseInsensitive: true, // Case insensitive sorting
+          },
+        },
+      ],
+      'no-unused-vars': 'warn',
+      'prettier/prettier': 'warn', // Run Prettier on all files
+    },
+  };
+
+.prettierrrc
+{
+    "singleQuote": true,
+    "trailingComma": "all",
+    "tabWidth": 2,
+    "semi": true
+  }
+
+
+      "devDependencies": {
+        "@eslint/eslintrc": "^3",
+        "@types/node": "^20",
+        "@types/qrcode": "^1.5.5",
+        "@types/react": "^19",
+        "@types/react-dom": "^19",
+        "eslint": "^9.25.1",
+        "eslint-config-next": "15.2.0",
+        "eslint-config-prettier": "^10.1.2",
+        "eslint-plugin-prettier": "^5.2.6",
+        "eslint-plugin-simple-import-sort": "^12.1.1",
+        "postcss": "^8",
+        "prettier": "^3.5.3",
+        "supabase": "^2.15.8",
+        "tailwindcss": "^3.4.1",
+        "typescript": "^5"
+      }
+.vscode/setting.json
+{
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true,
+      "source.fixAll.eslint": true
+    },
+    "eslint.validate": ["javascript", "typescript", "typescriptreact"],
+    "prettier.requireConfig": true, // Make sure Prettier uses your config
+    "editor.formatOnSave": true,  // Enable Prettier on save
+    "editor.codeActionsOnSaveTimeout": 750
+  }
+  

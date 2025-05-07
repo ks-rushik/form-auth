@@ -89,3 +89,20 @@ const ProgressBar: FC<IBaseProgressLinerProps> = ({
 };
 
 export default ProgressBar;
+
+@theme {
+  --animate-progress: progress 2s ease-in-out infinite;
+
+  @keyframes progress {
+    0% {
+      transform: translateX(-100%);
+    }
+    50% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(200%);
+    }
+  }
+}
+

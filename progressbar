@@ -1,0 +1,91 @@
+"use client";
+import { cva, VariantProps } from "class-variance-authority";
+import clsx from "clsx";
+import React, { useState, useEffect, FC } from "react";
+type IBaseProgressLinerProps = VariantProps<typeof ProgressLinerVarinats> & {
+  progress: number;
+};
+
+const ProgressLinerVarinats = cva("", {
+  variants: {
+    intent: {
+      default: "bg-gray-800",
+      primary: "bg-primary-main",
+      secondary: "bg-secondary-main",
+      info: "bg-info-main",
+      warning: "bg-warning-main",
+      error: "bg-error-main",
+      sucess: "bg-sucess-main",
+    },
+    filled: {
+      true: "",
+      false: "",
+    },
+  },
+  compoundVariants: [
+    {
+      intent: "default",
+      filled: true,
+      class: "!bg-gray-400",
+    },
+    {
+      intent: "primary",
+      filled: true,
+      class: "!bg-primary-lighter",
+    },
+    {
+      intent: "secondary",
+      filled: true,
+      class: "!bg-secondary-lighter",
+    },
+    {
+      intent: "info",
+      filled: true,
+      class: "!bg-info-lighter",
+    },
+    {
+      intent: "warning",
+      filled: true,
+      class: "!bg-warning-lighter",
+    },
+    {
+      intent: "error",
+      filled: true,
+      class: "!bg-error-lighter",
+    },
+  ],
+});
+
+const ProgressBar: FC<IBaseProgressLinerProps> = ({
+  progress,
+  filled,
+  intent,
+}) => {
+  const [barWidth, setBarWidth] = useState("0%");
+  const [active, setActive] = useState(false);
+
+  useEffect(() => {
+    const clampedProgress = Math.min(100, Math.max(0, progress));
+    setBarWidth(`${clampedProgress}%`);
+    setActive(true);
+  }, [progress]);
+
+  return (
+    <div
+      className={clsx(
+        ProgressLinerVarinats({ intent, filled }),
+        `w-full h-1 rounded-lg overflow-hidden`
+      )}
+    >
+      <div
+        className={clsx(
+          ProgressLinerVarinats({ intent }),
+          `h-full  rounded-lg !w-1/2 animate-progress  transition-all duration-300 ease-in-out`
+        )}
+        style={{ width: barWidth }}
+      ></div>
+    </div>
+  );
+};
+
+export default ProgressBar;

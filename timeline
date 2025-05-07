@@ -1,0 +1,119 @@
+import BaseTimeline from "../components/ui/BaseTimeline";
+import BaseTimelineItem from "../components/ui/BaseTimelineItem";
+
+
+export default function Page() {
+  return (
+    <div className="p-6">
+      <h2 className="font-bold mb-4">Alternating</h2>
+      <div className="bg-gray-50 p-6 rounded-md">
+        <BaseTimeline alternating>
+          <BaseTimelineItem title="Success" intent="sucess" outline />
+          <BaseTimelineItem title="Warning" intent="warning" outline />
+          <BaseTimelineItem title="Error" intent="error" outline />
+        </BaseTimeline>
+      </div>
+    </div>
+  );
+}
+
+// components/BaseTimeline.tsx
+"use client";
+import clsx from "clsx";
+import React, { ReactNode } from "react";
+
+type BaseTimelineProps = {
+  children: ReactNode;
+  className?: string;
+  alternating?: boolean;
+};
+
+const BaseTimeline = ({ children, className, alternating = false }: BaseTimelineProps) => {
+  const childArray = React.Children.toArray(children);
+
+  const renderedChildren = childArray.map((child, index) => {
+    if (React.isValidElement(child)) {
+      return React.cloneElement(child, {
+        position: alternating ? (index % 2 === 0 ? "right" : "left") : "right",
+      });
+    }
+    return child;
+  });
+  
+  return (
+    <div className={clsx("relative", className)}>
+      <div className="border-l border-gray-300 absolute left-1/2 transform translate-x-1/2 h-full" />
+      <div className="space-y-6">{renderedChildren}</div>
+    </div>
+  );
+};
+
+export default BaseTimeline;
+
+
+"use client";
+import clsx from "clsx";
+import { ReactNode } from "react";
+
+type BaseTimelineItemProps = {
+  title: string;
+  children?: ReactNode;
+  intent?: "default" | "primary" | "secondary" | "info" | "warning" | "sucess" | "error";
+  outline?: boolean;
+  position?: "left" | "right";
+};
+
+const intentColorMap: Record<string, string> = {
+  default: "bg-gray-400",
+  primary: "bg-blue-500",
+  secondary: "bg-purple-500",
+  info: "bg-cyan-500",
+  warning: "bg-yellow-500",
+  sucess: "bg-green-500",
+  error: "bg-red-500",
+};
+
+const BaseTimelineItem = ({
+  title,
+  children,
+  intent = "default",
+  outline = false,
+  position = "right",
+}: BaseTimelineItemProps) => {
+  const isLeft = position === "left";
+  const bulletColor = intentColorMap[intent];
+
+  return (
+    <div className="flex w-full min-h-[80px]">
+      {/* LEFT content */}
+      <div className={clsx("w-1/2 px-4 flex items-center", isLeft ? "justify-end text-right" : "justify-end invisible")}>
+        <div>
+          <h3 className="font-medium">{title}</h3>
+          {children && <p className="text-sm text-gray-600">{children}</p>}
+        </div>
+      </div>
+
+      {/* Center Line + Bullet */}
+      <div className="relative flex flex-col items-center w-0">
+        <div className="h-full w-[2px] bg-gray-300" />
+        <div
+          className={clsx(
+            "absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 z-10",
+            bulletColor,
+            outline && "bg-white"
+          )}
+        />
+      </div>
+
+      {/* RIGHT content */}
+      <div className={clsx("w-1/2 px-4 flex items-center", !isLeft ? "justify-start text-left" : "justify-start invisible")}>
+        <div>
+          <h3 className="font-medium">{title}</h3>
+          {children && <p className="text-sm text-gray-600">{children}</p>}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default BaseTimelineItem;

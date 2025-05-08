@@ -1,0 +1,52 @@
+<div className="relative pl-4">
+  {/* vertical line */}
+  <span className="absolute left-0 top-0 h-full w-px border-l border-dotted border-gray-400"></span>
+
+  <Group gap={5} onClick={() => tree.toggleExpanded(node.value)}>
+    <span>{node.label}</span>
+
+    {hasChildren && (
+      <IconChevronDown
+        size={14}
+        className={`transition-transform ${
+          expanded ? 'rotate-180' : 'rotate-0'
+        }`}
+      />
+    )}
+  </Group>
+</div>
+
+import { IconChevronDown } from '@tabler/icons-react';
+import { Group, RenderTreeNodePayload, Tree } from '@mantine/core';
+import { data } from './data';
+
+const renderTreeNode = ({
+  node,
+  expanded,
+  hasChildren,
+  elementProps,
+  tree,
+}: RenderTreeNodePayload) => {
+  return (
+    <div className="pl-2 border-l border-dotted border-gray-400">
+      <Group gap={5} {...elementProps} onClick={() => tree.toggleExpanded(node.value)}>
+        <span>{node.label}</span>
+
+        {hasChildren && (
+          <IconChevronDown
+            size={14}
+            className={`transition-transform ${
+              expanded ? 'rotate-180' : 'rotate-0'
+            }`}
+          />
+        )}
+      </Group>
+    </div>
+  );
+};
+
+function Demo() {
+  return <Tree data={data} levelOffset={23} expandOnClick={false} renderNode={renderTreeNode} />;
+}
+
+<div className={`pl-[${node.depth * 10}px] border-l border-dotted border-gray-400`}>

@@ -128,3 +128,95 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
+
+
+Great question!
+
+✅ You want the **selected language (like `English`, `Hindi`, etc.) to stay the same** when navigating between pages.
+
+To do this, there are two main things to handle:
+
+---
+
+## ✅ GOAL
+
+> Whenever user switches the page (via Link or router.push), the selected language (`/en`, `/hd`, etc.) **should stay in the URL** and **dropdown should show the correct language.**
+
+---
+
+## ✅ You’ve already done this:
+
+1. **Your URL contains the language prefix** (`/en/home`, `/hd/about`) ✅
+2. **You set `selectedLanguage` using `useEffect` when `pathname` changes** ✅
+
+```ts
+useEffect(() => {
+  const currentLocale = pathname.split("/")[1];
+  const index = localeList.indexOf(currentLocale);
+  setSelectedLanguage(index !== -1 ? labelList[index] : "English");
+}, [pathname]);
+```
+
+This makes sure that the dropdown updates as per the URL — perfect.
+
+---
+
+## ✅ Now make sure page links **include the current language**
+
+This is where most mistakes happen — if you just do `<Link href="/about">`, it goes to `/about`, **without the language code**.
+
+So, you need to **build your links dynamically using the current locale**.
+
+---
+
+### ✅ Step-by-Step Fix
+
+### 1. Get the current locale
+
+Put this in your `Navbar` or a global layout/context (wherever you manage links):
+
+```ts
+const pathname = usePathname();
+const currentLocale = pathname.split("/")[1]; // e.g., 'en' or 'hd'
+```
+
+### 2. Use it in links
+
+```tsx
+<Link href={`/${currentLocale}/about`}>About</Link>
+<Link href={`/${currentLocale}/contact`}>Contact</Link>
+```
+
+✅ This way, you preserve the selected language as users navigate.
+
+---
+
+### ✅ Bonus (Reusability Tip)
+
+If you use a lot of links, you can create a **helper function**:
+
+```ts
+const getLocalizedPath = (path: string) => `/${currentLocale}${path}`;
+```
+
+Then use it like:
+
+```tsx
+<Link href={getLocalizedPath("/about")}>About</Link>
+<Link href={getLocalizedPath("/products")}>Products</Link>
+```
+
+---
+
+### ✅ Summary
+
+| What You Need                     | Done?                                    |
+| --------------------------------- | ---------------------------------------- |
+| Update dropdown on route change   | ✅ Already using `useEffect`              |
+| Keep locale in URL during routing | ✅ Use `/${currentLocale}/page` in `href` |
+| Reusable path helper (optional)   | ✅ Cleaner code                           |
+
+---
+
+Let me know if you want to use **middleware**, **context**, or **Next.js i18n routing** to manage this automatically — I can guide you through that too.

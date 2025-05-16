@@ -1,0 +1,36 @@
+  useEffect(() => {
+    if (editModalImage) {
+      setPreview(editModalImage);
+      setFile(null);
+    }
+  }, [editModalImage, setFile]);
+
+
+  const handleEditItem = async (updateditem: IItemdata, file?: File) => {
+    const savedItem = await updateItem(updateditem, categoryId, file); // get updated item back
+    if (savedItem) {
+      setItem((prev) =>
+        prev?.map((item) => (item.id === savedItem.id ? savedItem : item)),
+      );
+      notifications.show({ message: "Category updated", color: "green" });
+    }
+  };
+
+ <div className="relative w-[470px] h-[350px] border border-dashed border-gray-400 rounded-md overflow-hidden bg-gray-100">
+          <Image
+            src={preview}
+            alt="Preview"
+            width={470}
+            height={350}
+            className="object-cover"
+          />
+          <TiDelete
+            onClick={() => {
+              setPreview(null);
+              setFile(null);
+            }}
+            size={28}
+            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-0.5 cursor-pointer hover:bg-red-600 transition-colors"
+            title="Remove image"
+          />
+        </div>
